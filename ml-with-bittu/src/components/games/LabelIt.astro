@@ -1,0 +1,126 @@
+---
+// Chapter 2 — supervised learning: you are the teacher who marks the answers
+---
+<div class="game sketch" data-game="label">
+  <p class="game__title">Mini-game 02 · You are the teacher</p>
+  <p>
+    Mark each message <b>Junk</b> or <b>Real</b>. Bittu never sees your reasoning — only your marks.
+    Then he studies which words show up on each pile and grades three messages he has never seen.
+  </p>
+
+  <div class="rows" data-train></div>
+
+  <div class="controls">
+    <button class="btn" data-train-btn disabled>Train Bittu on my labels</button>
+    <button class="btn btn--ghost" data-clear>Clear my labels</button>
+  </div>
+
+  <div class="results" data-results hidden>
+    <h3>Bittu grades the three new ones</h3>
+    <div class="rows" data-test></div>
+    <p class="readout">held-out score: <b data-tscore>0 / 3</b></p>
+  </div>
+</div>
+
+<style>
+  .rows { display: grid; gap: 8px; margin: 16px 0; }
+  .row {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    border-left: 3px solid var(--chalk-faint); padding: 6px 0 6px 12px;
+  }
+  .row p { margin: 0; flex: 1 1 260px; }
+  .row .pick { display: flex; gap: 6px; }
+  .pick button {
+    font-family: var(--data); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    background: none; border: 1px solid var(--chalk-faint); color: var(--ink);
+    padding: 4px 10px; border-radius: 14px; cursor: pointer;
+  }
+  .pick button[aria-pressed="true"] { background: var(--chalk); border-color: var(--chalk); color: var(--board); }
+  .verdict { font-family: var(--data); font-size: 12px; }
+  .verdict.ok { color: var(--chalk); }
+  .verdict.no { color: var(--wrong); }
+</style>
+
+<script>
+  import { say, win } from '../../scripts/game.js';
+
+  const TRAIN = [
+    'WINNER!! Claim your free prize now — click here',
+    'Are we still on for lunch at 1?',
+    'URGENT: your account will be closed, verify now',
+    'Sending the report before tomorrow\u2019s standup',
+    'Free free free! Winner winner — claim your bonus',
+    'Can you review my pull request when you get a minute?',
+  ];
+  const TRUTH = [1, 0, 1, 0, 1, 0]; // 1 = junk (only used to explain, never shown before training)
+  const TEST = [
+    ['Claim your free bonus now', 1],
+    ['Lunch at 1, same place?', 0],
+    ['URGENT: verify your account today', 1],
+  ];
+
+  const labels = new Array(TRAIN.length).fill(null);
+  const trainEl = document.querySelector('[data-train]');
+  const testEl = document.querySelector('[data-test]');
+  const btn = document.querySelector('[data-train-btn]');
+  const results = document.querySelector('[data-results]');
+
+  trainEl.innerHTML = TRAIN.map((t, i) => `
+    <div class="row">
+      <p>“${t}”</p>
+      <span class="pick">
+        <button data-i="${i}" data-v="1" aria-pressed="false">junk</button>
+        <button data-i="${i}" data-v="0" aria-pressed="false">real</button>
+      </span>
+    </div>`).join('');
+
+  trainEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-i]');
+    if (!b) return;
+    const i = +b.dataset.i;
+    labels[i] = +b.dataset.v;
+    trainEl.querySelectorAll(`button[data-i="${i}"]`).forEach((x) =>
+      x.setAttribute('aria-pressed', String(+x.dataset.v === labels[i])));
+    btn.disabled = labels.includes(null);
+  });
+
+  document.querySelector('[data-clear]').addEventListener('click', () => {
+    labels.fill(null);
+    trainEl.querySelectorAll('button[data-i]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    btn.disabled = true;
+    results.hidden = true;
+  });
+
+  const words = (s) => s.toLowerCase().match(/[a-z']+/g) || [];
+
+  btn.addEventListener('click', () => {
+    // count how often each word lands on each pile — that is the whole "model"
+    const junk = {}, real = {};
+    TRAIN.forEach((t, i) => {
+      const bag = labels[i] ? junk : real;
+      words(t).forEach((w) => { bag[w] = (bag[w] || 0) + 1; });
+    });
+    const weight = (w) => Math.log(((junk[w] || 0) + 1) / ((real[w] || 0) + 1));
+    const predict = (t) => words(t).reduce((s, w) => s + weight(w), 0) > 0 ? 1 : 0;
+
+    let right = 0;
+    testEl.innerHTML = TEST.map(([t, truth]) => {
+      const p = predict(t);
+      if (p === truth) right++;
+      return `<div class="row"><p>“${t}”</p>
+        <span class="verdict ${p === truth ? 'ok' : 'no'}">Bittu says ${p ? 'JUNK' : 'REAL'} ${p === truth ? '✓' : '✗'}</span></div>`;
+    }).join('');
+    results.hidden = false;
+    document.querySelector('[data-tscore]').textContent = `${right} / 3`;
+
+    const honest = labels.every((l, i) => l === TRUTH[i]);
+    if (right === 3) {
+      say('Three out of three, on messages I had never seen. I did not read them — I counted which words sat on which pile. That mapping from input to label is supervised learning.', 'party');
+      win(2, 'Chapter 2 done. Bone number two. 🦴', 1);
+    } else if (!honest) {
+      say('I got ' + right + ' of 3. Look at what you marked. I copied your labels faithfully, mistakes included. A supervised model can only be as right as its teacher — garbage in, garbage out.', 'oops');
+    } else {
+      say('I got ' + right + ' of 3 with only six examples. More labelled data usually fixes this. Try relabelling and watch me change my mind.', 'think');
+    }
+  });
+</script>

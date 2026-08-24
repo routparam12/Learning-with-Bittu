@@ -1,0 +1,116 @@
+---
+// Chapter 3 — regression: predicting a number
+---
+<div class="game sketch" data-game="fit">
+  <p class="game__title">Mini-game 03 · Draw the price line</p>
+  <p>
+    Twelve houses that actually sold. Move the line until it sits as close as possible to every dot.
+    The red hairs are the <b>errors</b> — how wrong the line is on each house. Squash them.
+  </p>
+
+  <canvas data-canvas data-h="320" aria-label="Scatter plot of house area against sale price"></canvas>
+
+  <div class="grid2">
+    <div>
+      <div class="slider">
+        <label>slope · ₹ lakh per m² (w) = <span data-wv>0.10</span></label>
+        <input type="range" min="0" max="0.8" step="0.005" value="0.1" data-w />
+      </div>
+      <div class="slider">
+        <label>starting price · lakh (b) = <span data-bv>30</span></label>
+        <input type="range" min="-20" max="60" step="0.5" value="30" data-b />
+      </div>
+      <div class="controls">
+        <button class="btn btn--treat" data-gd>Run gradient descent</button>
+      </div>
+    </div>
+    <div>
+      <p class="readout">average squared error: <b data-mse>—</b></p>
+      <p class="readout">target: <b data-goal>—</b> or lower</p>
+      <p class="readout">your line predicts a 120 m² house at <b data-pred>—</b></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { say, win, fitCanvas, axes, dot } from '../../scripts/game.js';
+
+  const AREA = [45, 58, 66, 72, 85, 96, 104, 118, 130, 145, 162, 185];
+  const NOISE = [3.1, -4.2, 2.6, -1.4, 5.0, -3.6, 1.1, 4.4, -5.1, 2.0, -2.4, 3.3];
+  const PTS = AREA.map((x, i) => ({ x, y: +(0.34 * x + 11 + NOISE[i]).toFixed(1) }));
+
+  const cv = document.querySelector('[data-canvas]');
+  const wIn = document.querySelector('[data-w]');
+  const bIn = document.querySelector('[data-b]');
+  const mseOut = document.querySelector('[data-mse]');
+  const predOut = document.querySelector('[data-pred]');
+
+  // closed-form best fit, used only to set a fair target
+  const n = PTS.length;
+  const mx = PTS.reduce((s, p) => s + p.x, 0) / n;
+  const my = PTS.reduce((s, p) => s + p.y, 0) / n;
+  const W = PTS.reduce((s, p) => s + (p.x - mx) * (p.y - my), 0) / PTS.reduce((s, p) => s + (p.x - mx) ** 2, 0);
+  const B = my - W * mx;
+  const cost = (w, b) => PTS.reduce((s, p) => s + (p.y - (w * p.x + b)) ** 2, 0) / n;
+  const GOAL = cost(W, B) * 1.15;
+  document.querySelector('[data-goal]').textContent = GOAL.toFixed(1);
+
+  const X0 = 0, X1 = 200, Y0 = 0, Y1 = 90;
+  let solved = false;
+
+  function draw() {
+    const { ctx, w: cw, h: ch } = fitCanvas(cv);
+    const pad = axes(ctx, cw, ch, 'area m²', '₹ lakh');
+    const sx = (x) => pad + ((x - X0) / (X1 - X0)) * (cw - pad - 12);
+    const sy = (y) => (ch - pad) - ((y - Y0) / (Y1 - Y0)) * (ch - pad - 14);
+
+    const w = +wIn.value, b = +bIn.value;
+
+    // errors
+    ctx.strokeStyle = 'rgba(255,128,121,.75)';
+    ctx.setLineDash([3, 3]); ctx.lineWidth = 1.5;
+    PTS.forEach((p) => {
+      ctx.beginPath(); ctx.moveTo(sx(p.x), sy(p.y)); ctx.lineTo(sx(p.x), sy(w * p.x + b)); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // the model
+    ctx.strokeStyle = '#6ee787'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(sx(X0), sy(w * X0 + b)); ctx.lineTo(sx(X1), sy(w * X1 + b)); ctx.stroke();
+
+    PTS.forEach((p) => dot(ctx, sx(p.x), sy(p.y), '#cdf5da', 5));
+
+    const c = cost(w, b);
+    document.querySelector('[data-wv]').textContent = w.toFixed(3);
+    document.querySelector('[data-bv]').textContent = b.toFixed(1);
+    mseOut.textContent = c.toFixed(1);
+    mseOut.parentElement.classList.toggle('readout--bad', c > GOAL);
+    predOut.textContent = '₹' + (w * 120 + b).toFixed(1) + ' lakh';
+
+    if (c <= GOAL && !solved) {
+      solved = true;
+      say('That is regression: the output is a number on a scale, not a category. The line is the model, and “training” just means nudging w and b until the squared errors stop shrinking.', 'party');
+      win(3, 'Chapter 3 done. Bone. 🦴', 1);
+    }
+  }
+
+  [wIn, bIn].forEach((el) => el.addEventListener('input', draw));
+  window.addEventListener('resize', draw);
+  draw();
+
+  document.querySelector('[data-gd]').addEventListener('click', () => {
+    let w = +wIn.value, b = +bIn.value, step = 0;
+    say('Watch. I nudge w and b downhill, a little at a time, in whichever direction shrinks the error.', 'think');
+    const loop = () => {
+      for (let i = 0; i < 12; i++) {
+        let gw = 0, gb = 0;
+        PTS.forEach((p) => { const e = p.y - (w * p.x + b); gw += -2 * p.x * e / n; gb += -2 * e / n; });
+        w -= 6e-6 * gw; b -= 6e-3 * gb;
+        step++;
+      }
+      wIn.value = w; bIn.value = b; draw();
+      if (step < 900) requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+  });
+</script>

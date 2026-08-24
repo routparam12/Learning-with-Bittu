@@ -1,0 +1,124 @@
+---
+// Chapter 1 — "explicitly programmed" vs "learned from data"
+---
+<div class="game sketch sketch--alt" data-game="rules">
+  <p class="game__title">Mini-game 01 · Program the rule yourself</p>
+  <p>
+    Twelve creatures. Six are <b>Wugs</b>, six are <b>Blips</b>. Nobody will tell you the difference —
+    but the ✓ / ✗ marks tell you when your rule is wrong. Write a rule with the two sliders.
+  </p>
+
+  <div class="creatures" data-zoo></div>
+
+  <div class="grid2">
+    <div>
+      <div class="slider">
+        <label>rule: size ≥ <span data-s>50</span></label>
+        <input type="range" min="20" max="100" value="50" step="5" data-size />
+      </div>
+      <div class="slider">
+        <label>and spikes ≥ <span data-k>2</span></label>
+        <input type="range" min="0" max="10" value="2" step="1" data-spikes />
+      </div>
+    </div>
+    <div>
+      <p class="readout">your rule gets <b data-score>0 / 12</b> right</p>
+      <p class="readout">best rule Bittu found: <b data-best>— </b></p>
+      <div class="controls">
+        <button class="btn btn--treat" data-learn>Let Bittu search instead</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .creatures {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 18px 0;
+  }
+  @media (max-width: 620px) { .creatures { grid-template-columns: repeat(4, 1fr); } }
+  .chip {
+    border: 2px solid var(--chalk-faint); border-radius: 18px 6px 20px 6px / 6px 20px 6px 18px;
+    padding: 4px; text-align: center; transition: border-color .2s;
+  }
+  .chip svg { width: 100%; height: auto; }
+  .chip small { font-family: var(--data); font-size: 10px; display: block; }
+  .chip.hit { border-color: var(--chalk); }
+  .chip.miss { border-color: var(--wrong); }
+  .chip.hit small { color: var(--chalk); }
+  .chip.miss small { color: var(--wrong); }
+</style>
+
+<script>
+  import { say, win } from '../../scripts/game.js';
+
+  const DATA = [
+    [30, 2], [80, 1], [85, 4], [45, 7], [50, 8], [70, 5],
+    [65, 3], [90, 9], [25, 9], [95, 2], [40, 4], [75, 6],
+  ].map(([size, spikes]) => ({ size, spikes, wug: 0.6 * size + 4.2 * spikes >= 62 }));
+
+  const zoo = document.querySelector('[data-zoo]');
+  const sizeIn = document.querySelector('[data-size]');
+  const spikeIn = document.querySelector('[data-spikes]');
+  const sOut = document.querySelector('[data-s]');
+  const kOut = document.querySelector('[data-k]');
+  const score = document.querySelector('[data-score]');
+  const bestOut = document.querySelector('[data-best]');
+  let touched = false;
+
+  function creatureSVG(c, pred) {
+    const r = 10 + c.size * 0.13;
+    let spikes = '';
+    for (let i = 0; i < c.spikes; i++) {
+      const a = (i / c.spikes) * Math.PI * 2 - Math.PI / 2;
+      const x1 = 30 + Math.cos(a) * r, y1 = 30 + Math.sin(a) * r;
+      const x2 = 30 + Math.cos(a) * (r + 7), y2 = 30 + Math.sin(a) * (r + 7);
+      spikes += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
+    }
+    const col = pred ? 'var(--chalk)' : 'rgba(205,245,218,.75)';
+    return `<svg viewBox="0 0 60 60" style="color:${col}">
+      <circle cx="30" cy="30" r="${r}" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="${26}" cy="27" r="2" fill="currentColor"/><circle cx="${34}" cy="27" r="2" fill="currentColor"/>
+      ${spikes}</svg>`;
+  }
+
+  function evaluate(S, K) {
+    return DATA.filter((c) => (c.size >= S && c.spikes >= K) === c.wug).length;
+  }
+
+  function render() {
+    const S = +sizeIn.value, K = +spikeIn.value;
+    sOut.textContent = S; kOut.textContent = K;
+    zoo.innerHTML = DATA.map((c) => {
+      const pred = c.size >= S && c.spikes >= K;
+      const ok = pred === c.wug;
+      return `<div class="chip ${ok ? 'hit' : 'miss'}">${creatureSVG(c, pred)}
+        <small>${pred ? 'Wug' : 'Blip'} ${ok ? '✓' : '✗'}</small></div>`;
+    }).join('');
+    const n = evaluate(S, K);
+    score.textContent = `${n} / 12`;
+    score.parentElement.classList.toggle('readout--bad', n < 9);
+    return n;
+  }
+
+  [sizeIn, spikeIn].forEach((el) => el.addEventListener('input', () => { touched = true; render(); }));
+  render();
+
+  document.querySelector('[data-learn]').addEventListener('click', () => {
+    if (!touched) { say('Try it by hand first. Move both sliders, watch the ✗ marks move around.', 'oops'); return; }
+    const mine = evaluate(+sizeIn.value, +spikeIn.value);
+    let best = { S: 20, K: 0, n: -1, tried: 0 };
+    const t0 = performance.now();
+    for (let S = 20; S <= 100; S += 1) {
+      for (let K = 0; K <= 10; K += 1) {
+        best.tried++;
+        const n = evaluate(S, K);
+        if (n > best.n) best = { S, K, n, tried: best.tried };
+      }
+    }
+    const ms = Math.max(1, Math.round(performance.now() - t0));
+    sizeIn.value = best.S; spikeIn.value = best.K; render();
+    bestOut.textContent = `size ≥ ${best.S} and spikes ≥ ${best.K} → ${best.n} / 12`;
+    say(`I tried ${best.tried} rules in ${ms} ms and kept the best: ${best.n} of 12. You got ${mine}. Nobody programmed the answer — I searched the data for it. Note I still miss one creature: no rule of this shape can get all twelve, and that is allowed. We only want least wrong.`, 'think');
+    win(1, 'Chapter 1 done. Bone, please. 🦴', 1);
+  });
+</script>

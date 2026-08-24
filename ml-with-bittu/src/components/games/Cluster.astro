@@ -1,0 +1,172 @@
+---
+// Chapter 4 — unsupervised learning: k-means, step by step
+---
+<div class="game sketch" data-game="cluster">
+  <p class="game__title">Mini-game 05 · Sort the customers with no labels</p>
+  <p>
+    Every dot is a customer. Nobody told you who is a bargain hunter and who is a big spender —
+    there are no labels here at all, only two numbers each. Run the two steps until nothing moves.
+  </p>
+
+  <canvas data-canvas data-h="340" aria-label="Customers plotted by visits per month and average basket size"></canvas>
+
+  <div class="controls">
+    <label class="readout">k =
+      <select data-k>
+        <option value="2">2</option>
+        <option value="3" selected>3</option>
+        <option value="4">4</option>
+      </select>
+    </label>
+    <button class="btn" data-sprinkle>1 · Drop k centroids</button>
+    <button class="btn btn--ghost" data-assign disabled>2 · Assign points</button>
+    <button class="btn btn--ghost" data-move disabled>3 · Move centroids</button>
+    <button class="btn btn--treat" data-run disabled>Repeat until still</button>
+  </div>
+
+  <p class="readout" data-status>waiting for centroids</p>
+
+  <div data-name-box hidden>
+    <h3>Now name what you found</h3>
+    <p>The algorithm found the groups. It has no idea what they mean — that part is your job.</p>
+    <div class="namers" data-namers></div>
+  </div>
+</div>
+
+<style>
+  select { font-family: var(--data); background: var(--board-2); color: var(--ink); border: 1px solid var(--chalk-faint); border-radius: 8px; padding: 3px 6px; }
+  .namers { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .namers label { font-family: var(--data); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+</style>
+
+<script>
+  import { say, win, fitCanvas, axes, dot } from '../../scripts/game.js';
+
+  const COLORS = ['#6ee787', '#ffbf69', '#7cc4ff', '#ff9ecb'];
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  const rnd = mulberry32(21);
+  const CENTERS = [[6, 9], [19, 37], [25, 11]];
+  const PTS = [];
+  CENTERS.forEach(([cx, cy]) => {
+    for (let i = 0; i < 22; i++) {
+      PTS.push({ x: cx + (rnd() - .5) * 9, y: cy + (rnd() - .5) * 11, c: -1 });
+    }
+  });
+
+  const cv = document.querySelector('[data-canvas]');
+  const kSel = document.querySelector('[data-k]');
+  const status = document.querySelector('[data-status]');
+  const bAssign = document.querySelector('[data-assign]');
+  const bMove = document.querySelector('[data-move]');
+  const bRun = document.querySelector('[data-run]');
+  let cent = [];
+  let converged = false, solved = false;
+
+  function draw() {
+    const { ctx, w: cw, h: ch } = fitCanvas(cv);
+    const pad = axes(ctx, cw, ch, 'visits / month', '₹ per basket (00s)');
+    const sx = (x) => pad + (x / 32) * (cw - pad - 12);
+    const sy = (y) => (ch - pad) - (y / 48) * (ch - pad - 14);
+
+    PTS.forEach((p) => {
+      if (p.c >= 0) {
+        ctx.strokeStyle = COLORS[p.c] + '44'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(sx(p.x), sy(p.y)); ctx.lineTo(sx(cent[p.c].x), sy(cent[p.c].y)); ctx.stroke();
+      }
+      dot(ctx, sx(p.x), sy(p.y), p.c < 0 ? 'rgba(205,245,218,.65)' : COLORS[p.c], 4.5);
+    });
+
+    cent.forEach((c, i) => {
+      ctx.strokeStyle = COLORS[i]; ctx.lineWidth = 3;
+      const X = sx(c.x), Y = sy(c.y);
+      ctx.beginPath(); ctx.moveTo(X - 8, Y); ctx.lineTo(X + 8, Y); ctx.moveTo(X, Y - 8); ctx.lineTo(X, Y + 8); ctx.stroke();
+      ctx.beginPath(); ctx.arc(X, Y, 11, 0, Math.PI * 2); ctx.stroke();
+    });
+  }
+
+  function sprinkle() {
+    const k = +kSel.value;
+    cent = [];
+    const used = new Set();
+    while (cent.length < k) {
+      const i = Math.floor(Math.random() * PTS.length);
+      if (used.has(i)) continue;
+      used.add(i);
+      cent.push({ x: PTS[i].x, y: PTS[i].y });
+    }
+    PTS.forEach((p) => { p.c = -1; });
+    converged = false;
+    bAssign.disabled = false; bMove.disabled = true; bRun.disabled = false;
+    status.textContent = 'centroids dropped at random — now assign every point to its nearest one';
+    draw();
+  }
+
+  function assign() {
+    let changed = false;
+    PTS.forEach((p) => {
+      let best = 0, bd = Infinity;
+      cent.forEach((c, i) => {
+        const d = (p.x - c.x) ** 2 + (p.y - c.y) ** 2;
+        if (d < bd) { bd = d; best = i; }
+      });
+      if (p.c !== best) { changed = true; p.c = best; }
+    });
+    bMove.disabled = false; bAssign.disabled = true;
+    draw();
+    if (!changed) finish();
+    else status.textContent = 'points joined their nearest centroid — now move each centroid to the middle of its own crowd';
+    return changed;
+  }
+
+  function move() {
+    cent.forEach((c, i) => {
+      const mine = PTS.filter((p) => p.c === i);
+      if (!mine.length) return;
+      c.x = mine.reduce((s, p) => s + p.x, 0) / mine.length;
+      c.y = mine.reduce((s, p) => s + p.y, 0) / mine.length;
+    });
+    bAssign.disabled = false; bMove.disabled = true;
+    status.textContent = 'centroids moved — assign again and see if anybody switches sides';
+    draw();
+  }
+
+  function finish() {
+    if (converged) return;
+    converged = true;
+    bAssign.disabled = true; bMove.disabled = true; bRun.disabled = true;
+    status.textContent = 'still. nobody switched sides — the clustering has converged.';
+    const box = document.querySelector('[data-name-box]');
+    const namers = document.querySelector('[data-namers]');
+    namers.innerHTML = cent.map((_, i) => `
+      <label><span class="swatch" style="background:${COLORS[i]}"></span>
+        group ${i + 1}
+        <select>
+          <option>budget shoppers</option><option>premium buyers</option>
+          <option>seasonal buyers</option><option>weekend regulars</option>
+        </select></label>`).join('');
+    box.hidden = false;
+    if (!solved) {
+      solved = true;
+      say('Converged. Notice what never happened: nobody handed me a correct answer. I only measured distances until the groups stopped changing. That is unsupervised learning — structure pulled out of unlabelled data. The names you pick next are yours, not mine.', 'party');
+      win(5, 'Chapter 5 done. 🦴', 1);
+    }
+  }
+
+  document.querySelector('[data-sprinkle]').addEventListener('click', sprinkle);
+  bAssign.addEventListener('click', assign);
+  bMove.addEventListener('click', move);
+  bRun.addEventListener('click', () => {
+    let guard = 0;
+    const tick = () => {
+      if (converged || guard++ > 40) return;
+      if (bAssign.disabled) move(); else if (!assign()) return;
+      setTimeout(tick, 420);
+    };
+    tick();
+  });
+  kSel.addEventListener('change', sprinkle);
+  window.addEventListener('resize', draw);
+  draw();
+</script>

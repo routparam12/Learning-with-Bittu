@@ -1,0 +1,135 @@
+---
+// Chapter 5 — what a model actually is, and how to tell a good one from a show-off
+---
+<div class="game sketch sketch--alt" data-game="overfit">
+  <p class="game__title">Mini-game 06 · Pick the model that survives new data</p>
+  <p>
+    Filled dots are the <b>training set</b> — the model gets to see them. Hollow amber dots are the
+    <b>test set</b>, hidden from training. Turn up the flexibility and watch the two error bars
+    disagree. Lock in the model you would actually ship.
+  </p>
+
+  <canvas data-canvas data-h="330" aria-label="Curve fitted through training points with hidden test points"></canvas>
+
+  <div class="grid2">
+    <div>
+      <div class="slider">
+        <label>flexibility · polynomial degree = <span data-dv>1</span></label>
+        <input type="range" min="1" max="9" step="1" value="1" data-d />
+      </div>
+      <div class="controls"><button class="btn btn--treat" data-lock>Ship this model</button></div>
+    </div>
+    <div>
+      <p class="readout">error on data it studied: <b data-tr>—</b></p>
+      <div class="bar"><i data-trbar style="background:var(--chalk)"></i></div>
+      <p class="readout">error on data it never saw: <b data-te>—</b></p>
+      <div class="bar"><i data-tebar style="background:var(--bittu)"></i></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .bar { height: 10px; border: 1px solid var(--chalk-faint); border-radius: 6px; overflow: hidden; margin: 2px 0 14px; }
+  .bar i { display: block; height: 100%; width: 0; transition: width .25s ease; }
+</style>
+
+<script>
+  import { say, win, fitCanvas, axes, dot } from '../../scripts/game.js';
+
+  const RAW = [
+    [0.2, 5.88], [0.67, 5.95], [1.14, 6.38], [1.61, 6.89], [2.08, 7.03], [2.55, 5.47], [3.02, 3.92],
+    [3.49, 2.36], [3.96, 2.31], [4.43, 0.31], [4.9, 1.81], [5.37, 1.11], [5.84, 2.61], [6.31, 4.77],
+  ];
+  const TRAIN = RAW.filter((_, i) => i % 3 !== 1);
+  const TEST = RAW.filter((_, i) => i % 3 === 1);
+
+  const sc = (x) => (x - 3.2) / 3.2;
+
+  function solve(A, b) {
+    const n = b.length;
+    for (let i = 0; i < n; i++) {
+      let p = i;
+      for (let r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[p][i])) p = r;
+      [A[i], A[p]] = [A[p], A[i]]; [b[i], b[p]] = [b[p], b[i]];
+      if (Math.abs(A[i][i]) < 1e-12) continue;
+      for (let r = i + 1; r < n; r++) {
+        const f = A[r][i] / A[i][i];
+        for (let c = i; c < n; c++) A[r][c] -= f * A[i][c];
+        b[r] -= f * b[i];
+      }
+    }
+    const x = new Array(n).fill(0);
+    for (let i = n - 1; i >= 0; i--) {
+      let s = b[i];
+      for (let c = i + 1; c < n; c++) s -= A[i][c] * x[c];
+      x[i] = Math.abs(A[i][i]) < 1e-12 ? 0 : s / A[i][i];
+    }
+    return x;
+  }
+
+  function fit(deg) {
+    const m = deg + 1, lam = 1e-7;
+    const A = Array.from({ length: m }, () => new Array(m).fill(0));
+    const b = new Array(m).fill(0);
+    TRAIN.forEach(([x, y]) => {
+      const v = []; for (let j = 0; j < m; j++) v.push(sc(x) ** j);
+      for (let r = 0; r < m; r++) { for (let c = 0; c < m; c++) A[r][c] += v[r] * v[c]; b[r] += v[r] * y; }
+    });
+    for (let r = 0; r < m; r++) A[r][r] += lam;
+    return solve(A, b);
+  }
+
+  const evalp = (co, x) => co.reduce((s, c, j) => s + c * sc(x) ** j, 0);
+  const rmse = (co, set) => Math.sqrt(set.reduce((s, [x, y]) => s + (y - evalp(co, x)) ** 2, 0) / set.length);
+
+  const scores = [];
+  for (let d = 1; d <= 9; d++) { const co = fit(d); scores.push({ d, tr: rmse(co, TRAIN), te: rmse(co, TEST) }); }
+  const BEST = scores.reduce((a, b) => (b.te < a.te ? b : a)).d;
+
+  const cv = document.querySelector('[data-canvas]');
+  const dIn = document.querySelector('[data-d]');
+
+  function draw() {
+    const d = +dIn.value;
+    const co = fit(d);
+    const { ctx, w: cw, h: ch } = fitCanvas(cv);
+    const pad = axes(ctx, cw, ch, 'x', 'y');
+    const sx = (x) => pad + (x / 6.6) * (cw - pad - 12);
+    const sy = (y) => (ch - pad) - ((y + 2) / 12) * (ch - pad - 14);
+
+    ctx.strokeStyle = '#6ee787'; ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= 260; i++) {
+      const x = (i / 260) * 6.6;
+      const y = Math.max(-2.5, Math.min(10.5, evalp(co, x)));
+      i ? ctx.lineTo(sx(x), sy(y)) : ctx.moveTo(sx(x), sy(y));
+    }
+    ctx.stroke();
+
+    TRAIN.forEach(([x, y]) => dot(ctx, sx(x), sy(y), '#cdf5da', 5));
+    TEST.forEach(([x, y]) => dot(ctx, sx(x), sy(y), '#ffbf69', 6, false));
+
+    const s = scores[d - 1];
+    document.querySelector('[data-dv]').textContent = d;
+    document.querySelector('[data-tr]').textContent = s.tr.toFixed(2);
+    document.querySelector('[data-te]').textContent = s.te.toFixed(2);
+    const cap = 4;
+    document.querySelector('[data-trbar]').style.width = Math.min(100, (s.tr / cap) * 100) + '%';
+    document.querySelector('[data-tebar]').style.width = Math.min(100, (s.te / cap) * 100) + '%';
+  }
+
+  dIn.addEventListener('input', draw);
+  window.addEventListener('resize', draw);
+  draw();
+
+  document.querySelector('[data-lock]').addEventListener('click', () => {
+    const d = +dIn.value;
+    if (d === BEST) {
+      say(`Degree ${d}. Lowest error on data it never studied — that is the only score that counts. Now you have the full sentence: data plus algorithm gives a model, and a model is just the function that survived the test set.`, 'party');
+      win(6, 'Board complete. All bones collected. 🦴', 2);
+    } else if (scores[d - 1].tr < scores[BEST - 1].tr) {
+      say(`Degree ${d} looks brilliant on the training dots and falls apart between them. That is overfitting: memorising instead of learning. Watch the amber bar, not the green one.`, 'oops');
+    } else {
+      say(`Degree ${d} is too stiff to follow the shape at all — both errors stay high. That is underfitting. Give it a little more flexibility.`, 'think');
+    }
+  });
+</script>
