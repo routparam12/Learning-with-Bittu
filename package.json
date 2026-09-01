@@ -1,0 +1,17 @@
+{
+  "name": "machinelearning-with-bittu",
+  "type": "module",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^4.16.18"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

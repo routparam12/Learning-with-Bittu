@@ -1,0 +1,29 @@
+---
+/* One pipeline-stage section. Prose comes from the localised dict entry; the
+   stage's game (if any) is passed as the default slot. */
+interface Props {
+  index: number;
+  total: number;
+  stage: any;      // localised { title, body[], after?[], callout?, isNew? }
+  t: any;
+}
+const { index, total, stage, t } = Astro.props;
+const num = index + 1;
+---
+<section class="stage-sec" data-stage={index} id={`stage-${num}`}>
+  <p class="stage-sec__eyebrow">
+    {t.ui.stageOf(num, total)}
+    {stage.isNew && <span class="is-new"> {t.ui.newSince}</span>}
+  </p>
+  <h2>{stage.title}</h2>
+
+  {stage.body.map((p: string) => <p set:html={p} />)}
+
+  <aside class="stage-note" data-stage-note hidden></aside>
+
+  {stage.callout && <p class="callout" set:html={stage.callout} />}
+
+  <slot />
+
+  {stage.after && stage.after.map((p: string) => <p set:html={p} />)}
+</section>

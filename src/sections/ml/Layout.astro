@@ -1,0 +1,52 @@
+---
+import './styles/ml.css';
+import Bittu from './components/Bittu.astro';
+import Toolbar from './components/Toolbar.astro';
+import AppSwitch from '../../shared/components/AppSwitch.astro';
+import { DEFAULT_LOCALE, getDict } from './i18n/index.js';
+import { SECTION_BY_ID } from '../index.js';
+
+const { locale = DEFAULT_LOCALE, title } = Astro.props;
+const t = getDict(locale);
+const pageTitle = title || t.meta.title;
+const accent = SECTION_BY_ID.ml.accent;
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={t.meta.description} />
+    <link rel="icon" href="/bittu.svg" />
+    <script is:inline>
+      // set the theme before first paint, so a saved light preference never flashes dark
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('bittu-theme') === 'light' ? 'light' : 'dark';
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-greeting={t.hero.greeting} data-section="ml" style={`--section-accent:${accent}`}>
+    <AppSwitch section="ml" locale={locale} />
+    <div class="hud">
+      <span data-hud-num>0/6</span>
+      <div class="hud__bar"><div class="hud__fill" data-hud-fill></div></div>
+      <span class="hud__treats" data-hud-treats>🦴 0</span>
+      <button class="btn btn--ghost" data-reset style="font-size:12px;padding:2px 12px 4px">{t.hud.reset}</button>
+    </div>
+
+    <Toolbar locale={locale} t={t} />
+
+    <main>
+      <slot />
+    </main>
+
+    <Bittu />
+
+    <script>
+      import { boot, say } from './scripts/game.js';
+      boot();
+      setTimeout(() => say(document.body.dataset.greeting, 'happy'), 500);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,74 @@
+---
+/* The Dial — stage 7. k slider 1→20 + rerank toggle. Non-monotonic without
+   rerank (right at k=5, wrong again at k=15); rerank flattens the right side. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Dial from '../../../../shared/components/game/Dial.astro';
+import Switch from '../../../../shared/components/game/Switch.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { KDIAL } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.theDial;
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <Dial name="dial-k" label={g.kLabel} min={KDIAL.range.min} max={KDIAL.range.max} step={KDIAL.range.step} value={KDIAL.range.default} />
+  <Switch name="dial-rerank" label={g.rerankLabel} />
+
+  <div slot="output">
+    <div class="dial__reads">
+      <span><b data-dial-k>5</b> {g.chunksIn}</span>
+      <span><b data-dial-tokens>900</b> {g.tokens}</span>
+      <span>{g.correct} <b class="badge" data-dial-ok></b></span>
+    </div>
+    <div class="panel">
+      <p class="mono-out" data-dial-answer></p>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, KDIAL }}>
+  (function () {
+    const kEl = document.querySelector('[data-dial="dial-k"]');
+    if (!kEl) return;
+    const root = kEl.closest('figure');
+    const kOut = root.querySelector('[data-dial-out="dial-k"]');
+    const rerankEl = root.querySelector('[data-switch="dial-rerank"]');
+    const kRead = root.querySelector('[data-dial-k]');
+    const tokRead = root.querySelector('[data-dial-tokens]');
+    const okRead = root.querySelector('[data-dial-ok]');
+    const answerEl = root.querySelector('[data-dial-answer]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+    let touched = false;
+
+    const table = KDIAL; // { raw, reranked }
+    const keys = Object.keys(table.raw).map(Number).sort((a, b) => a - b);
+    const nearest = (k) => keys.reduce((p, c) => (Math.abs(c - k) < Math.abs(p - k) ? c : p), keys[0]);
+
+    function render() {
+      const k = +kEl.value;
+      kOut.textContent = k;
+      const src = rerankEl.checked ? table.reranked : table.raw;
+      const row = src[nearest(k)];
+      kRead.textContent = k;
+      tokRead.textContent = (k * table.tokensPerChunk).toLocaleString();
+      okRead.textContent = row.ok ? g.yes : g.no;
+      okRead.className = 'badge ' + (row.ok ? 'badge--ok' : 'badge--bad');
+      answerEl.textContent = row.answer;
+
+      if (touched && row.why) { noteText.textContent = row.why; note.hidden = false; }
+      else if (touched) { noteText.textContent = row.ok ? 'Correct — and with a tight prompt.' : 'Wrong again.'; note.hidden = false; }
+    }
+    kEl.addEventListener('input', () => { touched = true; render(); });
+    rerankEl.addEventListener('change', () => { touched = true; render(); });
+    render();
+  })();
+</script>
+
+<style>
+  .dial__reads { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--mono); font-size: 12px; color: var(--ink-dim); }
+  .dial__reads b { color: var(--ink); }
+  .dial__reads .badge { font-weight: 400; }
+</style>

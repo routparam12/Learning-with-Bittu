@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../../../sections/dsa/Layout.astro';
+import { SEARCHES } from '../../../../sections/dsa/scripts/meta.js';
+import { DICTS, langPaths, href, type Lang } from '../../../../sections/dsa/i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = Astro.params.lang as Lang;
+const d = DICTS[lang];
+---
+<BaseLayout lang={lang} title={`${d.site.searching} — ${d.site.brand}`}>
+  <div class="wrap">
+    <header class="hero">
+      <a class="back" href={href(lang)}>{d.site.home}</a>
+      <h1>{d.site.searching}</h1>
+      <p>{d.site.searchingPick}</p>
+    </header>
+    <div class="cardgrid">
+      {SEARCHES.map((a) => (
+        <a class="acard" href={href(lang, `searching/${a.slug}`)}>
+          <span style="font-size:30px">{a.emoji}</span>
+          <h3>{d.algo[a.slug].name}</h3>
+          <p>{d.algo[a.slug].tagline}</p>
+          <span class="cx">
+            <span><b>{a.avg}</b> {d.site.average}</span>
+            <span><b>{a.space}</b> {d.site.space}</span>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

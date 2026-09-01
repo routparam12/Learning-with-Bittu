@@ -1,1 +1,26 @@
-/.claude
+# Dependencies
+node_modules/
+
+# Astro build output
+.astro/
+dist/
+
+# Claude / editor local
+.claude/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

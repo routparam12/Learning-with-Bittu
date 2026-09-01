@@ -1,0 +1,149 @@
+---
+/* The Cut — stage 2 (chunking). Ported to the exact content contract:
+   fixed passage, crude 5-term "retriever", four verdicts, chunk-size slider
+   default 140 (lands the boundary between the two halves of the fact), overlap
+   toggle off by default. The mascot note stays hidden until the first input. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Dial from '../../../../shared/components/game/Dial.astro';
+import Switch from '../../../../shared/components/game/Switch.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { HANDBOOK_PASSAGE, CUT } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.theCut;
+const contract = { ...CUT, passage: HANDBOOK_PASSAGE };
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <p class="thecut__q"><span class="thecut__qlabel">Q</span> {g.question}</p>
+  <Dial name="cut-size" label={g.sizeLabel} min={CUT.range.min} max={CUT.range.max} step={CUT.range.step} value={CUT.defaults.size} />
+  <Switch name="cut-overlap" label={g.overlapLabel} />
+
+  <div slot="output">
+    <div class="panel">
+      <p class="panel__cap">{g.retrieved}</p>
+      <div class="chunkview" data-cut-chunks></div>
+    </div>
+    <div class="panel">
+      <p class="panel__cap">{g.said}</p>
+      <p class="thecut__answer" data-cut-answer></p>
+      <span class="badge" data-cut-badge></span>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, contract }}>
+  (function () {
+    const sizeEl = document.querySelector('[data-dial="cut-size"]');
+    if (!sizeEl) return;
+    const root = sizeEl.closest('figure');
+    const sizeOut = root.querySelector('[data-dial-out="cut-size"]');
+    const overlapEl = root.querySelector('[data-switch="cut-overlap"]');
+    const chunksEl = root.querySelector('[data-cut-chunks]');
+    const answerEl = root.querySelector('[data-cut-answer]');
+    const badgeEl = root.querySelector('[data-cut-badge]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+
+    const TEXT = contract.passage;
+    const { FULL, HALF, ELIG, TERMS } = contract;
+    let touched = false;
+
+    /* --- exact chunking: char window, two boundary snaps, no libraries --- */
+    function chunk(size, overlap) {
+      const step = Math.max(1, Math.round(size * (1 - overlap)));
+      const out = [];
+      let start = 0;
+      while (start < TEXT.length) {
+        let end = Math.min(TEXT.length, start + size);
+        if (end < TEXT.length) {
+          const back = TEXT.lastIndexOf(' ', end);
+          if (back > start + 24) end = back;              // snap end back to a space, if >24 into the chunk
+        }
+        let s = start;
+        if (s > 0 && TEXT[s - 1] !== ' ' && TEXT[s] !== ' ') {
+          const fwd = TEXT.indexOf(' ', s);
+          if (fwd !== -1 && fwd - s <= 18) s = fwd + 1;   // snap start forward off a mid-word landing
+        }
+        const piece = TEXT.slice(s, end).trim();
+        if (piece) out.push(piece);
+        start += step;
+      }
+      return out;
+    }
+
+    function count(hay, needle) {
+      let n = 0, i = 0;
+      const h = hay.toLowerCase(), t = needle.toLowerCase();
+      while ((i = h.indexOf(t, i)) !== -1) { n++; i += t.length; }
+      return n;
+    }
+    const score = (c) => TERMS.reduce((n, term) => n + count(c, term), 0);
+
+    function markFacts(c) {
+      let html = c.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[ch]));
+      [FULL, HALF].forEach((f) => { html = html.split(f).join('<mark>' + f + '</mark>'); });
+      return html;
+    }
+
+    function render() {
+      const size = +sizeEl.value;
+      const overlap = overlapEl.checked ? contract.defaults.overlapPct : 0;
+      sizeOut.textContent = size;
+
+      const chunks = chunk(size, overlap);
+      let win = chunks[0] || '';
+      let best = -1;
+      chunks.forEach((c) => { const sc = score(c); if (sc > best) { best = sc; win = c; } });
+
+      chunksEl.innerHTML = chunks.map((c) =>
+        '<div class="chunk' + (c === win ? ' win' : '') + '">' + markFacts(c) + '</div>').join('');
+
+      const hasFull = win.includes(FULL);
+      const hasHalf = win.includes(HALF);
+      const hasElig = win.includes(ELIG);
+      const lead = hasElig ? g.leadElig : g.leadPlain;
+
+      let verdict, answer;
+      if (hasFull && hasHalf) {
+        verdict = g.verdicts.complete;
+        answer = '<b>' + lead + '</b>26 weeks at full pay, followed by a further 12 weeks at half pay.';
+        badgeEl.className = 'badge badge--ok';
+      } else if (hasFull) {
+        verdict = g.verdicts.fullOnly;
+        answer = '<b>' + lead + '</b>26 weeks at full pay.';
+        badgeEl.className = 'badge badge--warn';
+      } else if (hasHalf) {
+        verdict = g.verdicts.halfOnly;
+        answer = '<b>' + lead + '</b>12 weeks at half pay.';
+        badgeEl.className = 'badge badge--bad';
+      } else {
+        verdict = g.verdicts.neither;
+        answer = g.refusal;
+        badgeEl.className = 'badge badge--dim';
+      }
+      answerEl.innerHTML = answer;
+      badgeEl.textContent = verdict.badge;
+
+      if (touched) {
+        noteText.textContent = verdict.note;
+        note.hidden = false;
+      }
+    }
+
+    function onInput() { touched = true; render(); }
+    sizeEl.addEventListener('input', onInput);
+    overlapEl.addEventListener('change', onInput);
+    render(); // opens already showing the "sounds complete, isn't" failure — note stays silent
+  })();
+</script>
+
+<style>
+  .thecut__q { font-size: 14px; margin: 0 0 4px; }
+  .thecut__qlabel {
+    font-family: var(--mono); font-size: 10px; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; margin-right: 6px; color: var(--ink-dim);
+  }
+  .thecut__answer { margin: 0 0 8px; line-height: 1.55; }
+</style>

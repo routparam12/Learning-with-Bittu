@@ -1,0 +1,54 @@
+---
+/* GameShell — the inline card every micro-game sits in. Same column width as the
+   prose, never modal, no heavy chrome. Slots:
+     (default)  the one control + its immediate readout
+     "output"   the panel that reacts to the control
+     "note"     a MascotNote (stays hidden until the reader touches the control)
+   Props: title (short, monospace eyebrow), skipHref (anchor the "skip to the point"
+   link jumps to — always provided so skipping costs nothing). */
+interface Props { title: string; skipHref?: string }
+const { title, skipHref } = Astro.props;
+---
+<figure class="game" data-game>
+  <figcaption class="game__head">
+    <span class="game__title">{title}</span>
+    {skipHref && <a class="game__skip" href={skipHref}>skip to the point ↓</a>}
+  </figcaption>
+
+  <div class="game__controls">
+    <slot />
+  </div>
+
+  <div class="game__output">
+    <slot name="output" />
+  </div>
+
+  <slot name="note" />
+</figure>
+
+<style>
+  .game {
+    margin: 28px 0;
+    padding: 18px 18px 16px;
+    border: 1px solid var(--g-line, #1c3339);
+    border-radius: 12px;
+    background: var(--g-panel, #0e1c1f);
+  }
+  .game__head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .game__title {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--section-marker, #f0b64a);
+  }
+  .game__skip {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 10.5px; color: var(--g-ink-faint, #4e666b); text-decoration: none;
+  }
+  .game__skip:hover { color: var(--section-accent, #63c7cd); }
+  .game__controls { display: grid; gap: 12px; }
+  .game__output { margin-top: 14px; }
+  .game__output:empty { display: none; }
+</style>

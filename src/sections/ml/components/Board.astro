@@ -1,0 +1,191 @@
+---
+import Base from '../Layout.astro';
+import Chapter from './Chapter.astro';
+import Term from './Term.astro';
+import RuleVsLearn from './games/RuleVsLearn.astro';
+import LabelIt from './games/LabelIt.astro';
+import FitLine from './games/FitLine.astro';
+import DrawBoundary from './games/DrawBoundary.astro';
+import Cluster from './games/Cluster.astro';
+import Overfit from './games/Overfit.astro';
+import { getDict } from '../i18n/index.js';
+
+const { locale } = Astro.props;
+const t = getDict(locale);
+---
+
+<Base locale={locale} title={t.meta.title}>
+  <!-- ————— hero: the board itself ————— -->
+  <header class="hero wrap">
+    <div class="hero__map">
+      <h1>ML</h1>
+      <div class="branch">
+        <div class="sketch">{t.hero.branchSupervised}<br /><small>{t.hero.branchSupervisedSub}</small></div>
+        <div class="sketch sketch--alt">{t.hero.branchUnsupervised}<br /><small>{t.hero.branchUnsupervisedSub}</small></div>
+      </div>
+    </div>
+
+    <div class="hero__intro">
+      <p class="tag">{t.hero.tag}</p>
+      <p class="lede">
+        {t.hero.ledeBefore}<b>Bittu</b>{t.hero.ledeAfter}
+      </p>
+      <p>{t.hero.termBefore}<Term def={t.hero.termWordDef}>{t.hero.termWord}</Term>{t.hero.termAfter}</p>
+      <button class="btn" data-next="1">{t.hero.start}</button>
+    </div>
+  </header>
+
+  <!-- ————— 1 ————— -->
+  <Chapter n={1} eyebrow={t.ch1.eyebrow} title={t.ch1.title} locked={false} next={2} lockHint={t.lockHint} nextLabel={t.nextChapter}>
+    <div class="grid2">
+      <div class="sketch">
+        <p><b>{t.ch1.quoteBold}</b>{t.ch1.quoteAfter} <small>{t.ch1.quoteAttr}</small></p>
+        <p>
+          {t.ch1.normalLine}<br />
+          {t.ch1.mlLine}
+        </p>
+      </div>
+      <div>
+        <p>
+          {t.ch1.p2Before}<Term def={t.terms.learning}>{t.ch1.wordLearning}</Term>{t.ch1.p2Mid}<Term def={t.terms.data}>{t.ch1.wordData}</Term>{t.ch1.p2After}
+        </p>
+        <p>{t.ch1.prove}</p>
+      </div>
+    </div>
+    <RuleVsLearn t={t.games.rules} />
+  </Chapter>
+
+  <!-- ————— 2 ————— -->
+  <Chapter n={2} eyebrow={t.ch2.eyebrow} title={t.ch2.title} next={3} lockHint={t.lockHint} nextLabel={t.nextChapter}>
+    <div class="grid2">
+      <div class="sketch">
+        <p>
+          {t.ch2.p1Before}<Term def={t.terms.labelledData}>labelled data</Term>
+          {t.ch2.p1Mid}<span class="mono">{t.ch2.p1IO}</span>{t.ch2.p1After}
+        </p>
+        <p><b>{t.ch2.analogyLabel}</b> {t.ch2.analogy}</p>
+      </div>
+      <div>
+        <p>{t.ch2.predicting}</p>
+        <ul>
+          <li><Term def={t.terms.features}>Features (X)</Term> {t.ch2.featuresLine}</li>
+          <li><Term def={t.terms.label}>Label (Y)</Term> {t.ch2.labelLine}</li>
+          <li>{t.ch2.mappingLine}</li>
+        </ul>
+        <p>{t.ch2.flavours}</p>
+      </div>
+    </div>
+    <LabelIt t={t.games.label} />
+  </Chapter>
+
+  <!-- ————— 3 ————— -->
+  <Chapter n={3} eyebrow={t.ch3.eyebrow} title={t.ch3.title} next={4} lockHint={t.lockHint} nextLabel={t.nextChapter}>
+    <p>
+      {t.ch3.p1} <Term def={t.terms.regression}>regression</Term>{t.ch3.p1b}
+      <Term def={t.terms.loss}>loss</Term> {t.ch3.p1c}
+    </p>
+    <FitLine t={t.games.fit} />
+    <p class="footnote">
+      <Term def={t.terms.gradientDescent}>Gradient descent</Term> {t.ch3.footnote}
+    </p>
+  </Chapter>
+
+  <!-- ————— 4 ————— -->
+  <Chapter n={4} eyebrow={t.ch4.eyebrow} title={t.ch4.title} next={5} lockHint={t.lockHint} nextLabel={t.nextChapter}>
+    <p>
+      {t.ch4.p1} <Term def={t.terms.classification}>classification</Term>{t.ch4.p1b}
+      <Term def={t.terms.decisionBoundary}>decision boundary</Term> {t.ch4.p1c}
+    </p>
+    <DrawBoundary t={t.games.boundary} />
+    <p class="footnote">
+      {t.ch4.footnoteBefore} <Term def={t.terms.accuracy}>accuracy</Term> {t.ch4.footnote}
+    </p>
+  </Chapter>
+
+  <!-- ————— 5 ————— -->
+  <Chapter n={5} eyebrow={t.ch5.eyebrow} title={t.ch5.title} next={6} lockHint={t.lockHint} nextLabel={t.nextChapter}>
+    <div class="grid2">
+      <div class="sketch sketch--alt">
+        <p>
+          {t.ch5.p1Before}<Term def={t.terms.unlabelledData}>unlabelled data</Term>{t.ch5.p1After}
+        </p>
+        <p><b>{t.ch5.analogyLabel}</b> {t.ch5.analogy}</p>
+      </div>
+      <div>
+        <p>
+          {t.ch5.p2Before}<Term def={t.terms.clusters}>clusters</Term>{t.ch5.p2After}
+        </p>
+        <p>
+          {t.ch5.p3Before}<Term def={t.terms.k}>k</Term>{t.ch5.p3After}
+        </p>
+      </div>
+    </div>
+    <Cluster t={t.games.cluster} />
+  </Chapter>
+
+  <!-- ————— 6 ————— -->
+  <Chapter n={6} eyebrow={t.ch6.eyebrow} title={t.ch6.title} lockHint={t.lockHint}>
+    <div class="grid2">
+      <div class="sketch">
+        <p>
+          {t.ch6.p1Before}<Term def={t.terms.model}>model</Term>{t.ch6.p1After}
+        </p>
+        <p class="mono">{t.ch6.formula}</p>
+      </div>
+      <div>
+        <p>
+          {t.ch6.p2a} <Term def={t.terms.testSet}>test set</Term>{t.ch6.p2b}
+          <Term def={t.terms.overfit}>overfit</Term> {t.ch6.p2c}
+        </p>
+        <p>
+          {t.ch6.p3a} <Term def={t.terms.underfitting}>underfitting</Term>{t.ch6.p3b}
+        </p>
+      </div>
+    </div>
+    <Overfit t={t.games.overfit} />
+  </Chapter>
+
+  <!-- ————— next ————— -->
+  <section class="chapter wrap" data-chapter={7} data-locked="true">
+    <div class="lock"><span>🔒</span>{t.roadmap.locked}</div>
+    <p class="chapter__eyebrow">{t.roadmap.eyebrow}</p>
+    <h2>{t.roadmap.title}</h2>
+    <p>{t.roadmap.intro}</p>
+    <ol class="road">
+      {t.roadmap.items.map((item) => <li><b>{item.title}</b> — {item.desc}</li>)}
+    </ol>
+    <p>
+      {t.roadmap.mapBefore}<a href="https://roadmap.sh/machine-learning" target="_blank" rel="noopener">{t.roadmap.mapText}</a>{t.roadmap.mapMid}<a href="https://ncase.me/trust/" target="_blank" rel="noopener">{t.roadmap.mapInspo}</a>{t.roadmap.mapAfter}
+    </p>
+  </section>
+
+  <footer class="wrap end">
+    <p>{t.footer.built} <button class="btn btn--ghost" data-reset>{t.footer.wipe}</button></p>
+  </footer>
+</Base>
+
+<style>
+  .hero {
+    display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap);
+    align-items: center; padding: clamp(30px, 8vh, 80px) 0;
+  }
+  @media (max-width: 820px) { .hero { grid-template-columns: 1fr; } }
+  .hero__map { text-align: center; }
+  .hero__map h1 { font-size: clamp(90px, 17vw, 180px); line-height: .8; margin: 0; }
+  .branch { display: flex; gap: 14px; justify-content: center; margin-top: 26px; position: relative; }
+  .branch::before {
+    content: ''; position: absolute; top: -26px; left: 25%; right: 25%; height: 22px;
+    border-top: 2px dashed var(--chalk-faint); border-left: 2px dashed var(--chalk-faint);
+    border-right: 2px dashed var(--chalk-faint); border-radius: 12px 12px 0 0;
+  }
+  .branch .sketch { flex: 1; font-family: var(--display); font-size: 26px; color: var(--chalk); padding: 12px; }
+  .branch small { font-family: var(--body); font-size: 13px; color: var(--ink); }
+  .lede { font-size: 1.25rem; }
+  .mono { font-family: var(--data); font-size: 15px; color: var(--chalk); }
+  ul, ol { padding-left: 1.1em; margin: 0 0 .8em; }
+  li { margin-bottom: .3em; }
+  .footnote { font-size: .95rem; color: rgba(205, 245, 218, .8); margin-top: 14px; }
+  .road li { margin-bottom: .5em; }
+  .end { padding: 40px 0 90px; font-family: var(--data); font-size: 13px; color: var(--chalk-dim); }
+  small { font-size: .8em; opacity: .8; }
+</style>

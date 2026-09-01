@@ -1,0 +1,69 @@
+---
+/* Build the Ask — stage 8. Three toggles that add/remove blocks from the literal
+   prompt string; the resulting answer changes underneath. Opens all-on (the
+   reference prompt); the toggles are how you break it. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Switch from '../../../../shared/components/game/Switch.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.buildTheAsk;
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <Switch name="bta-ctx" label={g.ctx} checked />
+  <Switch name="bta-user" label={g.user} checked />
+  <Switch name="bta-refuse" label={g.refuse} checked />
+
+  <div slot="output">
+    <div class="panel">
+      <p class="mono-out" data-bta-prompt></p>
+    </div>
+    <div class="panel">
+      <p class="panel__cap">{g.answerCap}</p>
+      <p class="mono-out" data-bta-answer></p>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g }}>
+  (function () {
+    const ctxEl = document.querySelector('[data-switch="bta-ctx"]');
+    if (!ctxEl) return;
+    const root = ctxEl.closest('figure');
+    const userEl = root.querySelector('[data-switch="bta-user"]');
+    const refuseEl = root.querySelector('[data-switch="bta-refuse"]');
+    const promptEl = root.querySelector('[data-bta-prompt]');
+    const answerEl = root.querySelector('[data-bta-answer]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+    let touched = false;
+
+    const SYS = 'You are a support assistant. Answer the question.';
+    const CTX = 'CONTEXT:\n[1] The entitlement is 26 weeks at full pay, followed by a further 12 weeks at half pay. (Handbook p.4)\n[2] Eligible after twelve months of continuous service. (Handbook p.4)';
+    const USER = 'USER: Priya, role HR.';
+    const REFUSE = 'If the context does not contain the answer, say "I don\'t know."';
+    const Q = 'QUESTION: How much parental leave do I get?';
+
+    function render() {
+      const parts = [SYS];
+      if (ctxEl.checked) parts.push(CTX);
+      if (userEl.checked) parts.push(USER);
+      if (refuseEl.checked) parts.push(REFUSE);
+      parts.push(Q);
+      promptEl.textContent = parts.join('\n\n');
+
+      let answer, why;
+      if (!ctxEl.checked) { answer = g.answers.noCtx; why = 'No context block — the model answers from training data. Fluent, and wrong.'; }
+      else if (!refuseEl.checked) { answer = g.answers.noRefuse; why = 'Without the refusal line, an out-of-corpus question gets a confident invention.'; }
+      else if (!userEl.checked) { answer = g.answers.noUser; why = 'The answer is still correct — it just lost the personalised half.'; }
+      else { answer = g.answers.full; why = 'All three blocks in: grounded, personalised, and allowed to refuse. This is the reference prompt.'; }
+      answerEl.textContent = answer;
+
+      if (touched) { noteText.textContent = why; note.hidden = false; }
+    }
+    [ctxEl, userEl, refuseEl].forEach((el) => el.addEventListener('change', () => { touched = true; render(); }));
+    render();
+  })();
+</script>

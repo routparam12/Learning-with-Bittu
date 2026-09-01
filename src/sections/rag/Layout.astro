@@ -1,0 +1,36 @@
+---
+import './styles/rag.css';
+import AppSwitch from '../../shared/components/AppSwitch.astro';
+import { getDict } from './i18n/index.js';
+import { SECTION_BY_ID } from '../index.js';
+
+const { locale = 'en', title } = Astro.props;
+const t = getDict(locale);
+const pageTitle = title || t.meta.title;
+const accent = SECTION_BY_ID.rag.accent;
+---
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={t.meta.description} />
+    <link rel="icon" href="/bittu.svg" />
+    <script is:inline>
+      // shared theme key across the whole site
+      try {
+        var s = localStorage.getItem('bittu-theme');
+        document.documentElement.dataset.theme = s === 'light' ? 'light' : 'dark';
+      } catch (e) {}
+      try { localStorage.setItem('bittu-lang', document.documentElement.lang === 'hi' ? 'hi' : 'en'); } catch (e) {}
+    </script>
+  </head>
+  <body data-section="rag" style={`--section-accent:${accent}`}>
+    <AppSwitch section="rag" locale={locale} />
+
+    <main>
+      <slot />
+    </main>
+  </body>
+</html>

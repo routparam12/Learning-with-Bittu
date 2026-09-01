@@ -1,0 +1,110 @@
+---
+/* The 15 production RAG patterns. Browsable here (expand any card for its impact
+   bullets); "apply to the walkthrough" switches the whole page into that
+   pattern's mode — the affected stages get a note and the rail bends. */
+import { PATTERNS } from '../data/patterns.js';
+interface Props { t: any }
+const { t } = Astro.props;
+const rows = PATTERNS.map((p) => ({ ...p, ...t.patterns[p.id] }));
+---
+<section class="pgal" data-pattern-gallery data-active="basic">
+  <div class="pgal__head">
+    <h2 class="pgal__title">{t.ui.patternsHeading}</h2>
+    <p class="pgal__sub">{t.ui.patternsSub}</p>
+  </div>
+
+  <ol class="pgal__list">
+    {rows.map((p) => (
+      <li class="pgal__item" data-pattern-item={p.id}>
+        <details>
+          <summary class="pgal__row">
+            <span class="pgal__num">{p.num}</span>
+            <span class="pgal__icon" aria-hidden="true">{p.icon}</span>
+            <span class="pgal__name">{p.name}</span>
+            {p.affects.length > 0 && (
+              <span class="pgal__stages">
+                {t.ui.changesStages} {p.affects.map((s) => s + 1).join(', ')}
+              </span>
+            )}
+            <span class="pgal__chev" aria-hidden="true">▾</span>
+          </summary>
+          <div class="pgal__body">
+            <p class="pgal__tagline">{p.tagline}</p>
+            <ul class="pgal__bullets">
+              {p.bullets.map((b) => <li>{b}</li>)}
+            </ul>
+            <div class="pgal__actions">
+              {p.id === 'basic' ? (
+                <span class="pgal__baseline">the baseline this page already describes</span>
+              ) : (
+                <button type="button" class="pgal__apply" data-apply-pattern={p.id}>{t.ui.applyPattern}</button>
+              )}
+              <span class="pgal__applied" data-applied-badge hidden>{t.ui.appliedLabel}</span>
+            </div>
+          </div>
+        </details>
+      </li>
+    ))}
+  </ol>
+
+  <div class="pgal__reset" data-pattern-reset hidden>
+    <span data-pattern-current></span>
+    <button type="button" class="pgal__resetbtn" data-reset-pattern>{t.ui.resetPattern}</button>
+  </div>
+</section>
+
+<style>
+  .pgal { margin: 30px 0 0; }
+  .pgal__title { font-size: clamp(20px, 3.4vw, 26px); margin: 0 0 6px; }
+  .pgal__sub { font-size: 14px; color: var(--ink-dim); margin: 0 0 14px; }
+  .pgal__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .pgal__item { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); overflow: hidden; }
+  .pgal__item[data-on] { border-color: var(--marker); }
+  .pgal__row {
+    display: flex; align-items: center; gap: 10px; padding: 11px 13px; cursor: pointer; list-style: none;
+    font-size: 14px;
+  }
+  .pgal__row::-webkit-details-marker { display: none; }
+  .pgal__num {
+    font-family: var(--mono); font-size: 11px; width: 22px; height: 22px; flex: none;
+    display: grid; place-items: center; border: 1px solid var(--line); border-radius: 6px; color: var(--ink-dim);
+  }
+  .pgal__item[data-on] .pgal__num { border-color: var(--marker); color: var(--marker); }
+  .pgal__icon { font-size: 15px; flex: none; }
+  .pgal__name { font-weight: 600; }
+  .pgal__stages {
+    margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+    color: var(--ink-faint); white-space: nowrap;
+  }
+  .pgal__chev { color: var(--ink-faint); transition: transform .15s ease; font-size: 11px; }
+  details[open] .pgal__chev { transform: rotate(180deg); }
+  .pgal__body { padding: 0 13px 13px 45px; }
+  .pgal__tagline { font-size: 13.5px; color: var(--ink); margin: 0 0 8px; }
+  .pgal__bullets { margin: 0 0 12px; padding-left: 1.1em; }
+  .pgal__bullets li { font-size: 13px; color: var(--ink-dim); margin-bottom: 3px; }
+  .pgal__actions { display: flex; align-items: center; gap: 10px; }
+  .pgal__apply {
+    font-family: var(--mono); font-size: 11px; padding: 6px 11px; border-radius: 7px; cursor: pointer;
+    background: var(--teal); color: var(--bg); border: 1px solid var(--teal); font-weight: 600;
+  }
+  .pgal__baseline { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); }
+  .pgal__applied {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--marker); border: 1px solid color-mix(in srgb, var(--marker) 40%, transparent);
+    border-radius: 999px; padding: 2px 8px;
+  }
+  .pgal__reset {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 10px; padding: 10px 13px; border: 1px solid var(--marker);
+    border-radius: 10px; background: var(--marker-soft);
+    font-family: var(--mono); font-size: 12px; color: var(--ink);
+  }
+  .pgal__resetbtn {
+    font-family: var(--mono); font-size: 11px; background: none; border: 1px solid var(--ink-dim);
+    color: var(--ink-dim); border-radius: 7px; padding: 5px 10px; cursor: pointer;
+  }
+  @media (max-width: 600px) {
+    .pgal__stages { display: none; }
+    .pgal__body { padding-left: 13px; }
+  }
+</style>

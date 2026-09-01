@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../../sections/dsa/Layout.astro';
+import { SORTS, SEARCHES } from '../../../sections/dsa/scripts/meta.js';
+import { DICTS, langPaths, href, type Lang } from '../../../sections/dsa/i18n';
+import { petSVG } from '../../../sections/dsa/scripts/pet.js';
+
+export const getStaticPaths = langPaths;
+
+const lang = Astro.params.lang as Lang;
+const d = DICTS[lang];
+---
+<BaseLayout lang={lang}>
+  <div class="wrap">
+    <header class="hero">
+      <p class="kicker">{d.site.kicker}</p>
+      <h1>{d.site.heroA} <em>{d.site.heroEm}</em></h1>
+      <p>{d.site.heroSub}</p>
+      <div class="herowl" set:html={petSVG('happy', 120)} />
+    </header>
+
+    <div class="menu">
+      <a class="gate" href={href(lang, 'sorting')}>
+        <span class="big">🗂️</span>
+        <h2>{d.site.sorting}</h2>
+        <p>{d.site.sortingBlurb}</p>
+        <span class="n">{d.site.nAlgos(SORTS.length)}</span>
+      </a>
+      <a class="gate" href={href(lang, 'searching')}>
+        <span class="big">🔍</span>
+        <h2>{d.site.searching}</h2>
+        <p>{d.site.searchingBlurb}</p>
+        <span class="n">{d.site.nAlgos(SEARCHES.length)}</span>
+      </a>
+    </div>
+
+    <p class="foot">{d.site.foot}</p>
+  </div>
+</BaseLayout>

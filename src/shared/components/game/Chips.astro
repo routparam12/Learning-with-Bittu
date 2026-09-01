@@ -1,0 +1,36 @@
+---
+/* Chips — a row of preset buttons (query presets, causes). One is pressed at a
+   time. Game script listens on `[data-chips]` and reads `data-value` off the
+   clicked `[data-chip]`. */
+interface Props { name: string; options: { value: string; label: string }[]; active?: string }
+const { name, options, active = options[0]?.value } = Astro.props;
+---
+<div class="chips" data-chips={name} role="group">
+  {options.map((o) => (
+    <button
+      type="button"
+      class:list={['chip', { on: o.value === active }]}
+      data-chip
+      data-value={o.value}
+      aria-pressed={o.value === active ? 'true' : 'false'}
+    >{o.label}</button>
+  ))}
+</div>
+
+<style>
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 12px; padding: 7px 12px; border-radius: 999px; cursor: pointer;
+    background: var(--g-panel-2, #122428); color: var(--g-ink-dim, #7c9599);
+    border: 1px solid var(--g-line, #1c3339);
+    transition: color .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .chip:hover { color: var(--section-accent, #63c7cd); }
+  .chip.on {
+    background: color-mix(in srgb, var(--section-accent, #63c7cd) 18%, transparent);
+    border-color: var(--section-accent, #63c7cd);
+    color: var(--g-ink, #d6e4e4);
+  }
+  .chip:focus-visible { outline: 2px solid var(--section-accent, #63c7cd); outline-offset: 3px; }
+</style>

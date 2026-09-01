@@ -1,0 +1,25 @@
+---
+/* MascotNote — the one line the mascot says about what just happened. Hidden on
+   load; the game's script removes [hidden] on the first real interaction, so it
+   is always a payoff and never a prompt. The game updates its text; the label
+   here is only the initial value. Slot into GameShell's "note" slot. */
+interface Props { sprite?: string; text?: string }
+const { sprite = '🔎', text = '' } = Astro.props;
+---
+<p class="mascot-note" data-mascot-note hidden>
+  <span class="mascot-note__sprite" aria-hidden="true">{sprite}</span>
+  <span class="mascot-note__text" data-mascot-note-text>{text}</span>
+</p>
+
+<style>
+  .mascot-note {
+    display: flex; gap: 10px; align-items: flex-start;
+    margin: 14px 0 0; padding: 11px 13px;
+    border-radius: 10px;
+    background: var(--section-marker-soft, rgba(240, 182, 74, .16));
+    border: 1px solid color-mix(in srgb, var(--section-marker, #f0b64a) 40%, transparent);
+    font-size: 13.5px; line-height: 1.5; color: var(--g-ink, #d6e4e4);
+  }
+  .mascot-note[hidden] { display: none; }
+  .mascot-note__sprite { flex: none; font-size: 15px; line-height: 1.4; }
+</style>

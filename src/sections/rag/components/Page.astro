@@ -1,0 +1,76 @@
+---
+import Layout from '../Layout.astro';
+import PipelineRail from './PipelineRail.astro';
+import QuestionBar from './QuestionBar.astro';
+import PatternGallery from './PatternGallery.astro';
+import Stage from './Stage.astro';
+import ModelTiers from './ModelTiers.astro';
+import TheCut from './games/TheCut.astro';
+import DropThePin from './games/DropThePin.astro';
+import PickThePipe from './games/PickThePipe.astro';
+import TwoBadges from './games/TwoBadges.astro';
+import TheDial from './games/TheDial.astro';
+import BuildTheAsk from './games/BuildTheAsk.astro';
+import WhatBroke from './games/WhatBroke.astro';
+import CheckTheClaim from './games/CheckTheClaim.astro';
+import { getDict } from '../i18n/index.js';
+import { STAGES } from '../data/stages.js';
+import { PATTERNS } from '../data/patterns.js';
+import { DEFAULT_QUESTION } from '../scripts/pipeline.js';
+
+const { locale } = Astro.props;
+const t = getDict(locale);
+const total = STAGES.length;
+
+const GAMES = { TheCut, DropThePin, PickThePipe, TwoBadges, TheDial, BuildTheAsk, WhatBroke, CheckTheClaim };
+
+// merge structural stage meta with localised prose, by index
+const stages = STAGES.map((meta, i) => ({ ...meta, ...t.stages[i], num: i + 1 }));
+
+// the rail's localised list, embedded for rail.js to read
+const railData = { rail: STAGES.map((meta, i) => ({ ...t.rail[i], isNew: meta.isNew })) };
+
+// pattern data for pattern.js: structure + localised name/notes
+const patternData = {
+  patterns: Object.fromEntries(PATTERNS.map((p) => [p.id, {
+    name: t.patterns[p.id].name,
+    affects: p.affects,
+    flow: p.flow,
+    notes: t.patterns[p.id].notes,
+  }])),
+  ui: { withPattern: t.ui.withPattern, currentPattern: t.ui.currentPattern },
+};
+---
+<Layout locale={locale} title={t.meta.title}>
+  <div class="rag-page">
+    <PipelineRail t={t} question={DEFAULT_QUESTION} />
+
+    <div class="col">
+      <header class="rag-hero">
+        <h1>{t.hero.title}</h1>
+        {t.hero.body.map((p) => <p set:html={p} />)}
+        <QuestionBar t={t} question={DEFAULT_QUESTION} />
+        <PatternGallery t={t} />
+      </header>
+
+      {stages.map((stage, i) => {
+        const Game = stage.game ? GAMES[stage.game] : null;
+        const skipHref = `#stage-${stage.num}-after`;
+        return (
+          <Stage index={i} total={total} stage={stage} t={t}>
+            {stage.tiers && <ModelTiers kind={stage.tiers} t={t} />}
+            {Game && <Game t={t} skipHref={skipHref} />}
+            {stage.after && <span id={`stage-${stage.num}-after`}></span>}
+          </Stage>
+        );
+      })}
+    </div>
+  </div>
+
+  <script type="application/json" id="rag-data" set:html={JSON.stringify(railData)}></script>
+  <script type="application/json" id="rag-patterns" set:html={JSON.stringify(patternData)}></script>
+  <script>
+    import { boot } from '../scripts/rag.js';
+    boot();
+  </script>
+</Layout>

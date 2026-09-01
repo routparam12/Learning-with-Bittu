@@ -1,0 +1,82 @@
+---
+/* Site-wide section switcher. Sits in the top-left corner of every page and
+   flips between the sections defined in src/sections/index.js. Adding a section
+   there makes it appear here automatically. */
+import { SECTIONS, sectionHref } from '../../sections/index.js';
+
+interface Props { section: string; locale?: string }
+const { section, locale = 'en' } = Astro.props;
+const lang = locale === 'hi' ? 'hi' : 'en';
+---
+<nav class="appswitch" aria-label="Switch section">
+  {SECTIONS.map((s) => (
+    <a
+      href={sectionHref(s.id, lang)}
+      class:list={['appswitch__opt', { on: s.id === section }]}
+      style={`--section-accent:${s.accent}`}
+      aria-current={s.id === section ? 'page' : undefined}
+    >
+      <span class="appswitch__icon" aria-hidden="true">{s.icon}</span>
+      <span class="appswitch__label">{s.label}</span>
+    </a>
+  ))}
+</nav>
+
+<style>
+  .appswitch {
+    position: fixed;
+    top: clamp(8px, 1.6vw, 16px);
+    left: clamp(8px, 2vw, 20px);
+    z-index: 200;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(15, 18, 24, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  :root[data-theme="light"] .appswitch {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 6px 24px rgba(30, 40, 80, 0.14);
+  }
+
+  .appswitch__opt {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    color: rgba(240, 242, 250, 0.7);
+    white-space: nowrap;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  :root[data-theme="light"] .appswitch__opt { color: rgba(20, 24, 40, 0.62); }
+
+  .appswitch__opt:hover { color: #fff; }
+  :root[data-theme="light"] .appswitch__opt:hover { color: #000; }
+
+  .appswitch__opt.on {
+    background: var(--section-accent, #6d5efc);
+    color: #10121a;
+  }
+  .appswitch__opt.on:hover { color: #10121a; }
+
+  .appswitch__icon { font-size: 14px; line-height: 1; }
+
+  @media (max-width: 640px) {
+    .appswitch { top: 8px; left: 8px; gap: 2px; padding: 3px; }
+    .appswitch__opt { padding: 6px 10px; font-size: 12px; }
+    .appswitch__label { display: none; }
+    .appswitch__icon { font-size: 16px; }
+    .appswitch__opt.on .appswitch__label { display: inline; margin-left: 1px; }
+  }
+</style>

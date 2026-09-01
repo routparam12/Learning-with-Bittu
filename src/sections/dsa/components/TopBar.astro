@@ -1,0 +1,34 @@
+---
+import { LANGS, DICTS, swapLang, href, type Lang } from '../i18n';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const d = DICTS[lang];
+
+/* Labels the client-side toggles need, handed over as data so the script tag
+   can stay a plain module import. */
+const labels = JSON.stringify({
+  themeToLight: d.ui.themeToLight, themeToDark: d.ui.themeToDark,
+  sfxOn: d.ui.sfxOn, sfxOff: d.ui.sfxOff,
+  musicOn: d.ui.musicOn, musicOff: d.ui.musicOff
+});
+---
+
+<div class="chrome" data-chrome data-labels={labels}>
+  <div class="chrome-tools">
+    <nav class="langsw" aria-label={d.ui.language}>
+      {LANGS.map((l) => (
+        <a
+          href={swapLang(Astro.url, l)}
+          class:list={['langopt', { on: l === lang }]}
+          hreflang={DICTS[l].htmlLang}
+          aria-current={l === lang ? 'true' : undefined}
+        >{DICTS[l].short}</a>
+      ))}
+    </nav>
+
+    <button class="iconbtn" data-sfx-toggle type="button">🔇</button>
+    <button class="iconbtn" data-music-toggle type="button">🎬</button>
+    <button class="iconbtn" data-theme-toggle type="button">☀️</button>
+  </div>
+</div>

@@ -1,0 +1,272 @@
+/* RAG section — teal for structure, amber for the highlighter (retrieval is
+   literally marking the relevant passage). Green and purple are the other two
+   sections; this one is teal + amber. */
+
+:root {
+  --bg: #0a1315;
+  --panel: #0e1c1f;
+  --panel-2: #122428;
+  --line: #1c3339;
+  --line-soft: #16292e;
+  --ink: #d6e4e4;
+  --ink-dim: #7c9599;
+  --ink-faint: #4e666b;
+  --teal: #63c7cd;
+  --marker: #f0b64a;
+  --marker-soft: rgba(240, 182, 74, .16);
+  --alert: #d4695a;
+  --ok: #4f9a8f;
+  --done: #4f9a8f;
+
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+
+  /* names the shared game kit reads */
+  --g-bg: var(--bg);
+  --g-panel: var(--panel);
+  --g-panel-2: var(--panel-2);
+  --g-line: var(--line);
+  --g-ink: var(--ink);
+  --g-ink-dim: var(--ink-dim);
+  --g-ink-faint: var(--ink-faint);
+  --g-mono: var(--mono);
+
+  --section-accent: var(--teal);
+  --section-marker: var(--marker);
+  --section-marker-soft: var(--marker-soft);
+}
+
+:root[data-theme="light"] {
+  --bg: #f4f8f8;
+  --panel: #ffffff;
+  --panel-2: #eef4f4;
+  --line: #d3e0e0;
+  --line-soft: #e2ebeb;
+  --ink: #16292c;
+  --ink-dim: #4e666b;
+  --ink-faint: #7c9599;
+  --teal: #1f8f96;
+  --marker: #b9791a;
+  --marker-soft: rgba(185, 121, 26, .14);
+  --alert: #c0392b;
+  --ok: #2f7d70;
+  --done: #2f7d70;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; padding: 0 0 90px;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--sans); line-height: 1.7;
+  transition: background-color .25s ease, color .25s ease;
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+a { color: var(--teal); }
+mark {
+  background: var(--marker-soft); color: inherit;
+  border-bottom: 2px solid var(--marker); padding: 0 1px;
+}
+:focus-visible { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+/* ---------- reading column ---------- */
+.rag-page { position: relative; }
+.col { max-width: 680px; margin: 0 auto; padding: 0 20px; }
+
+.rag-hero { padding: 56px 0 28px; }
+.rag-hero h1 {
+  font-size: clamp(30px, 6vw, 46px); letter-spacing: -.02em; margin: 0 0 14px;
+}
+.rag-hero p { font-size: 17px; color: #c3d4d4; margin: 0 0 14px; }
+:root[data-theme="light"] .rag-hero p { color: #38504f; }
+
+/* ---------- stage section ---------- */
+.stage-sec { padding: 60px 0; border-bottom: 1px solid var(--line-soft); scroll-margin-top: 120px; }
+.stage-sec:last-of-type { border-bottom: 0; }
+.stage-sec__eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--marker); margin: 0 0 12px;
+}
+.stage-sec__eyebrow .is-new { color: var(--teal); }
+.stage-sec h2 { font-size: clamp(23px, 4.4vw, 31px); letter-spacing: -.01em; margin: 0 0 16px; }
+.stage-sec p { font-size: 16px; color: #c3d4d4; margin: 0 0 16px; }
+:root[data-theme="light"] .stage-sec p { color: #38504f; }
+.stage-sec ul { margin: 0 0 16px; padding-left: 1.2em; }
+.stage-sec li { margin-bottom: 6px; color: #c3d4d4; }
+:root[data-theme="light"] .stage-sec li { color: #38504f; }
+.stage-sec code {
+  font-family: var(--mono); font-size: .88em;
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px;
+}
+.stage-sec .lede { font-size: 17px; color: var(--ink); }
+
+.callout {
+  border-left: 2px solid var(--teal); padding: 4px 0 4px 16px; margin: 20px 0;
+  font-size: 15px; color: var(--ink-dim);
+}
+
+/* "With <pattern>:" note — appears in a stage only when that pattern is applied */
+.stage-note {
+  display: block; margin: 18px 0; padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--marker) 45%, transparent);
+  border-left-width: 3px;
+  border-radius: 8px; background: var(--marker-soft);
+  font-size: 14.5px; line-height: 1.55; color: var(--ink);
+}
+.stage-note[hidden] { display: none; }
+.stage-note__tag {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--marker); margin-right: 6px;
+}
+
+/* ---------- the vertical pipeline rail (a chain down the side of the page) ---------- */
+.railv {
+  position: absolute; top: 0; bottom: 0;
+  left: max(14px, calc(50% - 340px - 172px));
+  width: 156px; z-index: 30;
+  pointer-events: none;                 /* re-enabled on the interactive bits */
+}
+.railv__spine {
+  position: absolute; left: 7px; width: 2px;
+  background: var(--line); border-radius: 2px;
+}
+.railv__fill {
+  position: absolute; left: 0; top: 0; width: 100%; height: 0;
+  background: linear-gradient(180deg, var(--done), var(--teal));
+  border-radius: 2px; transition: height .45s cubic-bezier(.4, 0, .2, 1);
+}
+.railv__stages { position: absolute; inset: 0; }
+
+/* pattern loop / branch arrows drawn over the rail */
+.railv__flow { position: absolute; inset: 0; overflow: visible; pointer-events: none; z-index: 4; }
+.railv__flow path { stroke: var(--marker); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.railv__flow-label {
+  font-family: var(--mono); font-size: 8.5px; fill: var(--marker); letter-spacing: .02em;
+}
+
+/* dots a chosen pattern touches */
+.railv__stage.affected .railv__dot { border-color: var(--marker); box-shadow: 0 0 0 3px var(--marker-soft); }
+.railv__stage.affected .railv__label { color: var(--marker); }
+.railv__stage {
+  position: absolute; left: 0; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 11px;
+  background: none; border: 0; padding: 5px 0; cursor: pointer; pointer-events: auto;
+  font-family: inherit; color: inherit; text-align: left;
+}
+.railv__dot {
+  position: relative; z-index: 2; flex: none;
+  width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box;
+  background: var(--bg); border: 2px solid var(--line);
+  transition: border-color .25s ease, background .25s ease, box-shadow .25s ease;
+}
+.railv__dot::after {
+  content: ""; position: absolute; inset: 3px; border-radius: 50%;
+  background: transparent; transition: background .2s ease;
+}
+.railv__stage.done .railv__dot { border-color: var(--done); background: var(--done); }
+.railv__stage.current .railv__dot { border-color: var(--marker); background: var(--bg); box-shadow: 0 0 0 4px var(--marker-soft); }
+.railv__stage.current .railv__dot::after { background: var(--marker); }
+.railv__stage.is-new .railv__dot::before {
+  content: ""; position: absolute; inset: -5px; border-radius: 50%;
+  border: 1px dashed var(--marker); opacity: .55;
+}
+.railv__label {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; line-height: 1.25;
+  color: var(--ink-faint); transition: color .2s ease; max-width: 122px;
+}
+.railv__num { color: var(--ink-faint); margin-right: 4px; }
+.railv__stage.done .railv__label { color: var(--ink-dim); }
+.railv__stage.current .railv__label { color: var(--marker); font-weight: 600; }
+.railv__stage:hover .railv__label { color: var(--teal); }
+.railv__stage:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: 8px; }
+
+/* the pet turtle rides the chain */
+.railv__turtle {
+  position: absolute; left: -7px; top: 0; transform: translateY(-50%);
+  display: flex; align-items: flex-start; gap: 9px;
+  pointer-events: auto; z-index: 6;
+  transition: top .55s cubic-bezier(.34, 1.2, .5, 1);
+}
+.railv__turtlebtn { background: none; border: 0; padding: 0; cursor: pointer; display: block; width: 30px; height: 30px; flex: none; }
+.turtle { width: 30px; height: 30px; display: block; overflow: visible; }
+.turtle__shell { fill: var(--teal); stroke: color-mix(in srgb, var(--bg) 45%, var(--teal)); stroke-width: 1.2; }
+.turtle__shellline { stroke: color-mix(in srgb, var(--bg) 55%, var(--teal)); stroke-width: 1.4; fill: none; }
+.turtle__head, .turtle__leg, .turtle__tail { fill: var(--done); }
+.turtle__eye { fill: var(--bg); }
+.railv__bubble {
+  max-width: 220px; margin-top: -1px;
+  background: var(--panel); color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--teal) 45%, transparent);
+  border-radius: 10px; padding: 9px 11px;
+  font-size: 12.5px; line-height: 1.45;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+}
+.railv__bubble[hidden] { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .turtle__leg { transform-box: fill-box; transform-origin: center; animation: turtle-paddle 1.2s ease-in-out infinite; }
+  .turtle__leg--b { animation-delay: .6s; }
+  @keyframes turtle-paddle { 50% { transform: rotate(16deg) scaleY(.9); } }
+}
+
+/* tighter gutters → slim the rail; then drop the labels */
+@media (max-width: 1180px) {
+  .railv { left: 16px; width: 148px; }
+}
+@media (max-width: 980px) {
+  .railv { left: 0; width: 26px; }
+  .railv__label { display: none; }
+  .railv__spine { left: 12px; }
+  .railv__stage { gap: 0; }
+  .railv__dot { width: 13px; height: 13px; }
+  .railv__turtle { left: -2px; }
+  .railv__bubble {
+    position: fixed; left: 34px; bottom: 18px; z-index: 60; max-width: min(62vw, 260px);
+  }
+  .col { padding-left: 40px; }
+}
+@media (max-width: 520px) {
+  .railv__turtlebtn { width: 24px; height: 24px; }
+  .turtle { width: 24px; height: 24px; }
+}
+
+/* ---------- the question bar ---------- */
+.qbar { margin: 22px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.qbar__label { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-dim); }
+.qbar__row { display: flex; gap: 8px; margin-top: 8px; }
+.qbar__input {
+  flex: 1; font-family: var(--mono); font-size: 14px;
+  background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+}
+.qbar__btn {
+  font-family: var(--mono); font-size: 13px; padding: 10px 16px; border-radius: 8px; cursor: pointer;
+  background: var(--teal); color: var(--bg); border: 1px solid var(--teal); font-weight: 600;
+}
+.qbar__hint { font-family: var(--mono); font-size: 11px; color: var(--ink-faint); margin: 8px 0 0; }
+
+/* ---------- generic verdict badge (used by several games) ---------- */
+.badge {
+  display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid currentColor;
+}
+.badge--ok { color: var(--ok); }
+.badge--warn { color: var(--marker); }
+.badge--bad { color: var(--alert); }
+.badge--dim { color: var(--ink-faint); }
+
+.panel {
+  background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 13px 15px;
+  font-size: 14px;
+}
+.panel + .panel { margin-top: 10px; }
+.panel__cap { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 6px; }
+.mono-out { font-family: var(--mono); font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
+
+.chunkview { display: grid; gap: 8px; }
+.chunk {
+  font-family: var(--mono); font-size: 12px; line-height: 1.55;
+  padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--line); color: var(--ink-dim);
+}
+.chunk.win { border-style: solid; border-color: var(--teal); color: var(--ink); background: color-mix(in srgb, var(--teal) 8%, transparent); }

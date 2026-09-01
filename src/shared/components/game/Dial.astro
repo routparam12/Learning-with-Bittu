@@ -1,0 +1,42 @@
+---
+/* Dial — the one slider style, reused across every game that needs a range.
+   The game's own script reads `[data-dial]` by its `name`. */
+interface Props {
+  name: string; label: string; min: number; max: number; step?: number; value: number;
+  suffix?: string;
+}
+const { name, label, min, max, step = 1, value, suffix = '' } = Astro.props;
+---
+<label class="dial">
+  <span class="dial__row">
+    <span class="dial__label">{label}</span>
+    <output class="dial__val" data-dial-out={name}>{value}{suffix}</output>
+  </span>
+  <input
+    class="dial__input"
+    type="range"
+    data-dial={name}
+    name={name}
+    min={min} max={max} step={step} value={value}
+    data-suffix={suffix}
+  />
+</label>
+
+<style>
+  .dial { display: grid; gap: 6px; }
+  .dial__row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .dial__label {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--g-ink-dim, #7c9599);
+  }
+  .dial__val {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 13px; color: var(--section-accent, #63c7cd); font-weight: 600;
+  }
+  .dial__input {
+    width: 100%; accent-color: var(--section-accent, #63c7cd);
+    height: 22px; cursor: pointer;
+  }
+  .dial__input:focus-visible { outline: 2px solid var(--section-accent, #63c7cd); outline-offset: 4px; }
+</style>

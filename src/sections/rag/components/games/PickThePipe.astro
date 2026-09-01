@@ -1,0 +1,84 @@
+---
+/* Pick the Pipe — stage 5. A question hovers over three routes; tap one and see
+   what it returns. The vector route is the funny wrong one for the aggregate
+   question. Swap the question and the right pipe moves. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Chips from '../../../../shared/components/game/Chips.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.pickThePipe;
+const qOptions = g.questions.map((q: any, i: number) => ({ value: String(i), label: q.q }));
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <Chips name="ptp-q" options={qOptions} />
+  <div class="ptp__pipes" data-ptp-pipes role="group">
+    <button type="button" class="ptp__pipe" data-ptp-pipe="vector">{g.pipes.vector}</button>
+    <button type="button" class="ptp__pipe" data-ptp-pipe="sql">{g.pipes.sql}</button>
+    <button type="button" class="ptp__pipe" data-ptp-pipe="fetch">{g.pipes.fetch}</button>
+  </div>
+
+  <div slot="output">
+    <div class="panel">
+      <p class="panel__cap" data-ptp-corpus></p>
+      <p class="mono-out" data-ptp-result>— pick a route above —</p>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g }}>
+  (function () {
+    const chips = document.querySelector('[data-chips="ptp-q"]');
+    if (!chips) return;
+    const root = chips.closest('figure');
+    const pipes = root.querySelector('[data-ptp-pipes]');
+    const corpusEl = root.querySelector('[data-ptp-corpus]');
+    const resultEl = root.querySelector('[data-ptp-result]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+    let qi = 0, pipe = null, touched = false;
+
+    corpusEl.textContent = g.corpusNote;
+
+    function render() {
+      const q = g.questions[qi];
+      pipes.querySelectorAll('[data-ptp-pipe]').forEach((b) => {
+        b.classList.toggle('on', b.dataset.ptpPipe === pipe);
+        b.classList.toggle('right', b.dataset.ptpPipe === q.right && pipe !== null);
+      });
+      if (!pipe) { resultEl.textContent = '— pick a route above —'; return; }
+      resultEl.textContent = q[pipe];
+      if (touched) {
+        noteText.textContent = pipe === q.right
+          ? 'That is the pipe this question wants. Routing is choosing it before anything gets embedded.'
+          : 'Wrong pipe. It still returns something confident-looking — which is exactly why unrouted pipelines mislead.';
+        note.hidden = false;
+      }
+    }
+
+    chips.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-chip]');
+      if (!c) return;
+      chips.querySelectorAll('[data-chip]').forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
+      qi = +c.dataset.value; pipe = null; touched = true; render();
+    });
+    pipes.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-ptp-pipe]');
+      if (!b) return;
+      pipe = b.dataset.ptpPipe; touched = true; render();
+    });
+    render();
+  })();
+</script>
+
+<style>
+  .ptp__pipes { display: flex; gap: 8px; }
+  .ptp__pipe {
+    font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    background: var(--panel-2); color: var(--ink-dim); border: 1px solid var(--line);
+  }
+  .ptp__pipe.on { border-color: var(--teal); color: var(--ink); }
+  .ptp__pipe.right { box-shadow: inset 0 -2px 0 var(--ok); }
+</style>

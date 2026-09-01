@@ -1,0 +1,18 @@
+---
+interface Props { t: any; question: string }
+const { t, question } = Astro.props;
+---
+<form class="qbar" data-qbar>
+  <label class="qbar__label" for="rag-q">{t.ui.askLabel}</label>
+  <div class="qbar__row">
+    <input class="qbar__input" id="rag-q" data-qbar-input type="text" value={question} autocomplete="off" spellcheck="false" />
+    <button class="qbar__btn" type="submit">{t.ui.askBtn}</button>
+  </div>
+  <p class="qbar__hint">{t.ui.askHint}</p>
+  <p class="qbar__tracking">{t.ui.yourQuestion} <b data-q-echo>{`"${question}"`}</b></p>
+</form>
+
+<style>
+  .qbar__tracking { font-family: var(--mono); font-size: 11px; color: var(--ink-dim); margin: 6px 0 0; }
+  .qbar__tracking b { color: var(--teal); }
+</style>

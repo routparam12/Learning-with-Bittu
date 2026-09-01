@@ -1,0 +1,94 @@
+---
+/* Drop the Pin — stage 3. A 2D map of ~28 precomputed chunk positions. Tap a
+   query chip: a pin drops, the nearest five dots warm up and their text lists.
+   The third chip lands in empty space — five mediocre neighbours, which is what
+   "no good match" looks like as geometry. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Chips from '../../../../shared/components/game/Chips.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { EMBED_MAP } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.dropThePin;
+const chipOpts = EMBED_MAP.chips.map((c: any) => ({ value: c.value, label: c.label }));
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <Chips name="dtp-q" options={chipOpts} active={EMBED_MAP.chips[0].value} />
+
+  <div slot="output">
+    <svg class="dtp__map" viewBox="0 0 100 100" data-dtp-map preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      {EMBED_MAP.points.map((p: any, i: number) => (
+        <circle class={`dtp__dot dtp__dot--${p.c}`} data-dtp-dot={i} cx={p.x} cy={p.y} r="1.6" />
+      ))}
+      <g data-dtp-pin hidden>
+        <circle cx="0" cy="0" r="2.4" class="dtp__pin" />
+        <circle cx="0" cy="0" r="5" class="dtp__pin-ring" />
+      </g>
+    </svg>
+    <div class="panel">
+      <p class="panel__cap">{g.nearest}</p>
+      <ol class="dtp__list" data-dtp-list></ol>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, EMBED_MAP }}>
+  (function () {
+    const chips = document.querySelector('[data-chips="dtp-q"]');
+    if (!chips) return;
+    const root = chips.closest('figure');
+    const map = root.querySelector('[data-dtp-map]');
+    const pin = root.querySelector('[data-dtp-pin]');
+    const listEl = root.querySelector('[data-dtp-list]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+    const dots = [...root.querySelectorAll('[data-dtp-dot]')];
+    let touched = false;
+
+    function drop(chipValue) {
+      const chip = EMBED_MAP.chips.find((c) => c.value === chipValue) || EMBED_MAP.chips[0];
+      pin.setAttribute('transform', `translate(${chip.pin.x} ${chip.pin.y})`);
+      pin.hidden = false;
+
+      const ranked = EMBED_MAP.points
+        .map((p, i) => ({ p, i, d: Math.hypot(p.x - chip.pin.x, p.y - chip.pin.y) }))
+        .sort((a, b) => a.d - b.d);
+      const near = ranked.slice(0, 5);
+      const nearSet = new Set(near.map((n) => n.i));
+      dots.forEach((d, i) => d.classList.toggle('near', nearSet.has(i)));
+
+      listEl.innerHTML = near.map((n) =>
+        '<li>' + n.p.t + ' <span class="dtp__d">' + n.d.toFixed(0) + '</span></li>').join('');
+
+      if (touched) { noteText.textContent = chip.note; note.hidden = false; }
+    }
+
+    chips.addEventListener('click', (e) => {
+      const c = e.target.closest('[data-chip]');
+      if (!c) return;
+      chips.querySelectorAll('[data-chip]').forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
+      touched = true; drop(c.dataset.value);
+    });
+    drop(EMBED_MAP.chips[0].value); // opens with a clean match already shown
+  })();
+</script>
+
+<style>
+  .dtp__map {
+    width: 100%; height: auto; aspect-ratio: 1; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px;
+  }
+  .dtp__dot { fill: var(--ink-faint); opacity: .5; transition: opacity .2s ease, r .2s ease; }
+  .dtp__dot--policy { fill: var(--teal); }
+  .dtp__dot--error { fill: var(--alert); }
+  .dtp__dot--onboard { fill: var(--marker); }
+  .dtp__dot--finance { fill: #8aa0d8; }
+  .dtp__dot.near { opacity: 1; r: 2.4; }
+  .dtp__pin { fill: var(--ink); }
+  .dtp__pin-ring { fill: none; stroke: var(--ink); stroke-width: .5; opacity: .5; }
+  .dtp__list { margin: 0; padding-left: 1.3em; font-size: 12.5px; color: var(--ink-dim); }
+  .dtp__list li { margin-bottom: 4px; }
+  .dtp__d { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); }
+</style>

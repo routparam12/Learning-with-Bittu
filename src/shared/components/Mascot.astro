@@ -1,0 +1,47 @@
+---
+/* Mascot — the section's character in the corner. Deliberately quiet: it has no
+   idle chatter and never prompts an interaction. A section wires it up by
+   importing '../../shared/scripts/mascot.js' and calling say(text) after the
+   reader does something. On RAG it mirrors whatever the last MascotNote said.
+
+   Props: sprite (emoji or short text), name, side ('right' | 'left'). */
+interface Props { sprite?: string; name?: string; side?: 'right' | 'left' }
+const { sprite = '🔎', name = 'Guide', side = 'right' } = Astro.props;
+---
+<div class="mascot" data-mascot data-side={side} aria-live="polite">
+  <div class="mascot__bubble" data-mascot-bubble hidden></div>
+  <button class="mascot__sprite" data-mascot-poke type="button" aria-label={name}>
+    <span aria-hidden="true">{sprite}</span>
+  </button>
+</div>
+
+<style>
+  .mascot {
+    position: fixed; bottom: clamp(10px, 2vw, 22px); z-index: 50;
+    display: flex; align-items: flex-end; gap: 10px; pointer-events: none;
+  }
+  .mascot[data-side="right"] { right: clamp(10px, 2vw, 24px); flex-direction: row-reverse; }
+  .mascot[data-side="left"]  { left: clamp(10px, 2vw, 24px); }
+  .mascot__bubble {
+    pointer-events: auto;
+    max-width: min(38ch, 62vw);
+    background: var(--g-panel, #0e1c1f);
+    border: 1px solid color-mix(in srgb, var(--section-accent, #63c7cd) 45%, transparent);
+    border-radius: 12px; padding: 11px 14px;
+    font-size: 13.5px; line-height: 1.5; color: var(--g-ink, #d6e4e4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+  }
+  .mascot__bubble[hidden] { display: none; }
+  .mascot__sprite {
+    pointer-events: auto;
+    width: clamp(40px, 7vw, 56px); height: clamp(40px, 7vw, 56px);
+    display: grid; place-items: center;
+    font-size: clamp(22px, 4vw, 30px); line-height: 1;
+    background: var(--g-panel, #0e1c1f);
+    border: 1px solid var(--g-line, #1c3339); border-radius: 50%;
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .mascot__bubble { transition: opacity .2s ease; }
+  }
+</style>

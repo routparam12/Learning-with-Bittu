@@ -1,0 +1,108 @@
+---
+/* Two Badges — stage 6. Two users, one shared policy, different records. The
+   "filter after search" switch moves the ACL check to the wrong side of
+   retrieval and the other user's balance leaks into the answer. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Switch from '../../../../shared/components/game/Switch.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { USERS, RETRIEVAL_TRACE } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.twoBadges;
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <p class="tb__q">{g.question}</p>
+  <div class="tb__users" data-tb-users role="group">
+    <button type="button" class="tb__user on" data-tb-user="priya">Priya · HR</button>
+    <button type="button" class="tb__user" data-tb-user="rahul">Rahul · Engineering</button>
+  </div>
+  <Switch name="tb-after" label={g.filterAfter} />
+
+  <div slot="output">
+    <div class="panel">
+      <p class="panel__cap">{g.trace}</p>
+      <ul class="tb__trace" data-tb-trace></ul>
+    </div>
+    <div class="panel">
+      <p class="panel__cap">{g.asUser} <span data-tb-asname>Priya</span></p>
+      <p class="tb__answer" data-tb-answer></p>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, USERS, RETRIEVAL_TRACE }}>
+  (function () {
+    const users = document.querySelector('[data-tb-users]');
+    if (!users) return;
+    const root = users.closest('figure');
+    const afterEl = root.querySelector('[data-switch="tb-after"]');
+    const traceEl = root.querySelector('[data-tb-trace]');
+    const answerEl = root.querySelector('[data-tb-answer]');
+    const asName = root.querySelector('[data-tb-asname]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+
+    let who = 'priya';
+    let touched = false;
+
+    function render() {
+      const me = USERS[who];
+      const other = USERS[who === 'priya' ? 'rahul' : 'priya'];
+      const leaking = afterEl.checked;
+      asName.textContent = me.name;
+
+      traceEl.innerHTML = RETRIEVAL_TRACE.map((c) => {
+        const mine = c.owner === 'public' || c.owner === me.owns;
+        const dropped = !mine;
+        const cls = dropped ? (leaking ? 'leaked' : 'dropped') : 'kept';
+        const tag = c.owner === 'public' ? 'policy' : (mine ? 'your record' : other.name + "'s record");
+        return '<li class="tb__row tb__row--' + cls + '"><span>' + c.text + '</span>' +
+          '<span class="tb__tag">' + tag + (dropped ? (leaking ? ' · shown to model' : ' · filtered out') : '') + '</span></li>';
+      }).join('');
+
+      const fill = (tpl, o) => tpl.replace(/\{(\w+)\}/g, (_, k) => o[k]);
+      let ans = fill(g.answerFor, { name: me.name, balance: me.balance });
+      if (leaking && who === 'rahul') {
+        ans += '<span class="tb__leak">' + fill(g.leak, { name: other.name, balance: other.balance }) + '</span>';
+      }
+      answerEl.innerHTML = ans;
+
+      if (touched) {
+        noteText.textContent = (leaking && who === 'rahul') ? g.leakNote : g.okNote;
+        note.hidden = false;
+      }
+    }
+
+    users.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-tb-user]');
+      if (!b) return;
+      who = b.dataset.tbUser;
+      users.querySelectorAll('[data-tb-user]').forEach((x) => x.classList.toggle('on', x === b));
+      touched = true; render();
+    });
+    afterEl.addEventListener('change', () => { touched = true; render(); });
+    render();
+  })();
+</script>
+
+<style>
+  .tb__q { font-size: 14px; font-style: italic; color: var(--ink-dim); margin: 0 0 4px; }
+  .tb__users { display: flex; gap: 8px; }
+  .tb__user {
+    font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    background: var(--panel-2); color: var(--ink-dim); border: 1px solid var(--line);
+  }
+  .tb__user.on { border-color: var(--teal); color: var(--ink); background: color-mix(in srgb, var(--teal) 14%, transparent); }
+  .tb__trace { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .tb__row { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); }
+  .tb__row span:first-child { color: var(--ink); }
+  .tb__tag { font-family: var(--mono); font-size: 10px; color: var(--ink-faint); white-space: nowrap; }
+  .tb__row--dropped { opacity: .45; }
+  .tb__row--dropped span:first-child { text-decoration: line-through; }
+  .tb__row--leaked { border-color: var(--alert); background: color-mix(in srgb, var(--alert) 10%, transparent); }
+  .tb__row--leaked .tb__tag { color: var(--alert); }
+  .tb__answer { margin: 0; line-height: 1.55; }
+  .tb__leak { color: var(--alert); font-weight: 600; }
+</style>

@@ -1,0 +1,20 @@
+{
+  "lastVerified": "2026-08",
+  "note": "Tier reasoning lives in the prose. Only these example names go stale — update this one file.",
+  "embedding": {
+    "tier1": { "name": "OpenAI text-embedding-3-small", "detail": "8,191 token limit · 1,536 dims · ~$0.02 / 1M tokens. The -large sibling: same limit, 3,072 dims, ~6× the price." },
+    "tier2": { "name": "Cohere embed-v4.0", "detail": "128K token context · 1,536 dims (configurable to 256) · multimodal · $0.12 / 1M. Voyage voyage-4-large is comparable." },
+    "tier3": { "name": "Voyage voyage-context-4", "detail": "up to 120K token context. Cohere embed-v4.0 also qualifies at 128K." },
+    "tier4": { "name": "all-MiniLM-L6-v2", "detail": "384 dims, runs on CPU. Jina jina-embeddings-v3 is stronger (8,192 tokens, 1,024 dims) but CC-BY-NC — commercial self-hosting needs a licence." },
+    "tier5": { "name": "Cohere embed-v4.0", "detail": "100+ languages, small cross-language quality gap. Google gemini-embedding-001 is an alternative." }
+  },
+  "llm": {
+    "tier1": { "name": "Claude Opus 5 · GPT-5.6 · Gemini 3.1 Pro", "detail": "maximum reasoning — multi-hop questions, code, high-stakes summarisation, at low query volume." },
+    "tier2": { "name": "Claude Sonnet 5 · mid-tier GPT-5.x · Gemini 3.1 Pro (standard)", "detail": "the default production choice: read 3–5 chunks, answer faithfully, cite." },
+    "tier3": { "name": "Claude Haiku 4.5 · Gemini 3.5 Flash", "detail": "high-QPS surfaces, and the routing / rewriting steps that are just small classifications." },
+    "tier4": { "name": "Llama / Mistral open-weight lines", "detail": "on-prem / air-gapped, or answering from a fixed small corpus. Check current release names — they move fast." }
+  },
+  "fixedFacts": [
+    "OpenAI text-embedding-3-small and -large both cap at 8,191 input tokens. Not 1,048. This number has held across ada-002 and the whole v3 generation."
+  ]
+}

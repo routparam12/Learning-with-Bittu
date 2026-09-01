@@ -1,0 +1,25 @@
+---
+/* Reveal — a collapsed block that opens on click. Used for the "skip to the
+   point" prose and spoiler explanations. Native <details>, styled to match. */
+interface Props { label: string; open?: boolean }
+const { label, open = false } = Astro.props;
+---
+<details class="reveal" open={open}>
+  <summary class="reveal__summary">{label}</summary>
+  <div class="reveal__body"><slot /></div>
+</details>
+
+<style>
+  .reveal { margin: 14px 0; border-left: 2px solid var(--g-line, #1c3339); padding-left: 14px; }
+  .reveal__summary {
+    font-family: var(--g-mono, ui-monospace, monospace);
+    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--section-accent, #63c7cd); cursor: pointer; list-style: none;
+  }
+  .reveal__summary::-webkit-details-marker { display: none; }
+  .reveal__summary::before { content: '+ '; }
+  .reveal[open] .reveal__summary::before { content: '– '; }
+  .reveal__body { margin-top: 10px; }
+  .reveal__body :global(p) { margin: 0 0 10px; }
+  .reveal__body :global(p:last-child) { margin-bottom: 0; }
+</style>

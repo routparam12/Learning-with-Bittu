@@ -1,0 +1,93 @@
+---
+/* Check the Claim — stage 10. One toggle. Off: the underlined claim reads as
+   fact. On: search the retrieved chunks — supported lights teal, unsupported
+   flips the whole answer to a refusal. Two claims, shown one at a time. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import Switch from '../../../../shared/components/game/Switch.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { GROUNDEDNESS } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.checkTheClaim;
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <Switch name="ctc-check" label={g.toggle} />
+  <button type="button" class="ctc__next" data-ctc-next hidden>{t.games.whatBroke.next}</button>
+
+  <div slot="output">
+    <div class="panel">
+      <p class="ctc__answer" data-ctc-answer></p>
+      <div class="ctc__source" data-ctc-source hidden>
+        <p class="panel__cap">{g.source}</p>
+        <p data-ctc-source-text></p>
+      </div>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, GROUNDEDNESS }}>
+  (function () {
+    const checkEl = document.querySelector('[data-switch="ctc-check"]');
+    if (!checkEl) return;
+    const root = checkEl.closest('figure');
+    const nextEl = root.querySelector('[data-ctc-next]');
+    const answerEl = root.querySelector('[data-ctc-answer]');
+    const sourceEl = root.querySelector('[data-ctc-source]');
+    const sourceText = root.querySelector('[data-ctc-source-text]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+
+    let idx = 0;
+    let touched = false;
+
+    function render() {
+      const item = GROUNDEDNESS[idx];
+      const checking = checkEl.checked;
+      nextEl.hidden = GROUNDEDNESS.length < 2;
+
+      if (!checking) {
+        answerEl.className = 'ctc__answer';
+        answerEl.innerHTML = 'The answer says: <span class="ctc__claim">' + item.claim + '</span>';
+        sourceEl.hidden = true;
+      } else if (item.supported) {
+        answerEl.className = 'ctc__answer ctc__answer--ok';
+        answerEl.innerHTML = 'The answer says: <span class="ctc__claim ctc__claim--ok">' + item.claim + '</span>';
+        sourceText.textContent = item.source;
+        sourceEl.hidden = false;
+      } else {
+        answerEl.className = 'ctc__answer ctc__answer--bad';
+        answerEl.innerHTML = '<span class="ctc__claim ctc__claim--bad">' + item.claim + '</span><br><b>' + g.refusal + '</b>';
+        sourceEl.hidden = true;
+      }
+
+      if (touched) {
+        noteText.textContent = !checking ? g.supportedNote
+          : (item.supported ? g.supportedNote : g.unsupportedNote);
+        note.hidden = false;
+      }
+    }
+
+    checkEl.addEventListener('change', () => { touched = true; render(); });
+    nextEl.addEventListener('click', () => {
+      idx = (idx + 1) % GROUNDEDNESS.length;
+      checkEl.checked = false;
+      touched = true; render();
+    });
+    render();
+  })();
+</script>
+
+<style>
+  .ctc__next {
+    font-family: var(--mono); font-size: 11px; background: none; border: 1px solid var(--line);
+    color: var(--ink-dim); border-radius: 6px; padding: 5px 10px; cursor: pointer; justify-self: start;
+  }
+  .ctc__answer { margin: 0; line-height: 1.6; }
+  .ctc__claim { border-bottom: 2px solid var(--ink-faint); }
+  .ctc__claim--ok { border-color: var(--teal); color: var(--teal); }
+  .ctc__claim--bad { border-color: var(--alert); color: var(--alert); }
+  .ctc__source { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+  .ctc__source p:last-child { margin: 0; font-size: 13px; color: var(--ink); background: color-mix(in srgb, var(--teal) 8%, transparent); border-left: 2px solid var(--teal); padding: 6px 10px; }
+</style>

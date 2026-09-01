@@ -1,0 +1,11 @@
+---
+/* ML with Bittu — the default section, mounted at the locale root /{lang}/. */
+import Board from '../../sections/ml/components/Board.astro';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'en' } }, { params: { lang: 'hi' } }];
+}
+
+const { lang } = Astro.params;
+---
+<Board locale={lang} />

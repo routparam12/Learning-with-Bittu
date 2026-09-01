@@ -1,0 +1,86 @@
+---
+/* What Broke? — stage 9. A broken answer, three candidate causes, tap one to
+   reveal the true cause + a one-line fix + a link back. Reads as a gallery,
+   not a quiz: every tap reveals the same explanation. */
+import GameShell from '../../../../shared/components/game/GameShell.astro';
+import MascotNote from '../../../../shared/components/game/MascotNote.astro';
+import { FAILURES } from '../../data/corpus.js';
+interface Props { t: any; skipHref?: string }
+const { t, skipHref } = Astro.props;
+const g = t.games.whatBroke;
+---
+<GameShell title={g.title} skipHref={skipHref}>
+  <div class="wb__card">
+    <p class="wb__answer" data-wb-answer></p>
+    <p class="panel__cap">{g.prompt}</p>
+    <div class="wb__causes" data-wb-causes></div>
+  </div>
+  <button type="button" class="wb__next" data-wb-next>{g.next}</button>
+
+  <div slot="output">
+    <div class="panel" data-wb-reveal hidden>
+      <p class="mono-out" data-wb-truth></p>
+      <p class="wb__fix"><b>{g.fixLabel}</b> <span data-wb-fix></span></p>
+    </div>
+  </div>
+
+  <MascotNote slot="note" />
+</GameShell>
+
+<script define:vars={{ g, FAILURES }}>
+  (function () {
+    const nextEl = document.querySelector('[data-wb-next]');
+    if (!nextEl) return;
+    const root = nextEl.closest('figure');
+    const answerEl = root.querySelector('[data-wb-answer]');
+    const causesEl = root.querySelector('[data-wb-causes]');
+    const revealEl = root.querySelector('[data-wb-reveal]');
+    const truthEl = root.querySelector('[data-wb-truth]');
+    const fixEl = root.querySelector('[data-wb-fix]');
+    const note = root.querySelector('[data-mascot-note]');
+    const noteText = root.querySelector('[data-mascot-note-text]');
+    let idx = 0, touched = false;
+
+    function render(showReveal) {
+      const f = FAILURES[idx];
+      answerEl.textContent = f.answer;
+      causesEl.innerHTML = f.causes.map((c, i) =>
+        '<button type="button" class="wb__cause" data-i="' + i + '">' + c + '</button>').join('');
+      revealEl.hidden = !showReveal;
+      if (showReveal) {
+        truthEl.textContent = 'Cause: ' + f.causes[f.truth];
+        fixEl.textContent = f.fix;
+        if (touched) { noteText.textContent = f.fix; note.hidden = false; }
+      }
+    }
+
+    causesEl.addEventListener('click', (e) => {
+      if (!e.target.closest('[data-i]')) return;
+      touched = true;
+      render(true);
+      causesEl.querySelectorAll('.wb__cause').forEach((b, i) =>
+        b.classList.toggle('true', i === FAILURES[idx].truth));
+    });
+    nextEl.addEventListener('click', () => {
+      idx = (idx + 1) % FAILURES.length;
+      render(false);
+    });
+    render(false);
+  })();
+</script>
+
+<style>
+  .wb__card { display: grid; gap: 10px; }
+  .wb__answer { margin: 0; padding: 10px 12px; border-left: 2px solid var(--alert); background: color-mix(in srgb, var(--alert) 8%, transparent); font-size: 13.5px; }
+  .wb__causes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wb__cause {
+    font-family: var(--mono); font-size: 11.5px; padding: 6px 10px; border-radius: 8px; cursor: pointer;
+    background: var(--panel-2); color: var(--ink-dim); border: 1px solid var(--line); text-align: left;
+  }
+  .wb__cause.true { border-color: var(--ok); color: var(--ink); }
+  .wb__next {
+    font-family: var(--mono); font-size: 11px; background: none; border: 1px solid var(--line);
+    color: var(--ink-dim); border-radius: 6px; padding: 5px 10px; cursor: pointer; justify-self: start; margin-top: 4px;
+  }
+  .wb__fix { margin: 8px 0 0; font-size: 13px; }
+</style>

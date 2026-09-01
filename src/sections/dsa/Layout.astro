@@ -1,0 +1,45 @@
+---
+import './styles/dsa.css';
+import TopBar from './components/TopBar.astro';
+import AppSwitch from '../../shared/components/AppSwitch.astro';
+import { DICTS, LANGS, swapLang, type Lang } from './i18n';
+import { SECTION_BY_ID } from '../index.js';
+
+interface Props { lang: Lang; title?: string; desc?: string }
+const { lang, title, desc } = Astro.props;
+const d = DICTS[lang];
+const accent = SECTION_BY_ID.dsa.accent;
+---
+<!doctype html>
+<html lang={d.htmlLang} data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content={desc ?? d.site.desc} />
+  <title>{title ?? d.site.title}</title>
+
+  {LANGS.map((l) => (
+    <link rel="alternate" hreflang={DICTS[l].htmlLang} href={new URL(swapLang(Astro.url, l), Astro.site ?? Astro.url).href} />
+  ))}
+
+  {/* Set the theme before first paint so there is no light/dark flash. Shared key across the whole site. */}
+  <script is:inline>
+    (function () {
+      try {
+        var saved = localStorage.getItem('bittu-theme');
+        var t = saved || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+        document.documentElement.dataset.theme = t;
+      } catch (e) { /* localStorage blocked — keep the dark default */ }
+    })();
+  </script>
+</head>
+<body data-section="dsa" style={`--section-accent:${accent}`}>
+  <AppSwitch section="dsa" locale={lang} />
+  <TopBar lang={lang} />
+  <slot />
+  <script>
+    import { initChrome } from './scripts/chrome.js';
+    initChrome();
+  </script>
+</body>
+</html>

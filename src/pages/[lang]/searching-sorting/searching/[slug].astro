@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../../../sections/dsa/Layout.astro';
+import { SEARCHES } from '../../../../sections/dsa/scripts/meta.js';
+import { DICTS, LANGS, href, type Lang } from '../../../../sections/dsa/i18n';
+
+export function getStaticPaths() {
+  return LANGS.flatMap((lang) =>
+    SEARCHES.map((a) => ({ params: { lang, slug: a.slug }, props: { a } }))
+  );
+}
+
+const { a } = Astro.props;
+const lang = Astro.params.lang as Lang;
+const d = DICTS[lang];
+const info = d.algo[a.slug];
+---
+<BaseLayout lang={lang} title={`${info.name} — ${d.site.brand}`} desc={info.idea}>
+  <div id="app" data-algo={a.slug} data-lang={lang} data-home={href(lang, 'searching')}></div>
+</BaseLayout>
+<script>
+  import { mount } from '../../../../sections/dsa/scripts/ui.js';
+  const el = document.querySelector('[data-algo]');
+  if (el) {
+    const dict = el.dataset.lang === 'hi'
+      ? (await import('../../../../sections/dsa/i18n/hi')).hi
+      : (await import('../../../../sections/dsa/i18n/en')).en;
+    mount(el, dict);
+  }
+</script>
