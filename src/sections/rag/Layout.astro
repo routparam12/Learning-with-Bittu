@@ -1,6 +1,7 @@
 ---
 import './styles/rag.css';
 import AppSwitch from '../../shared/components/AppSwitch.astro';
+import Torty from './components/Torty.astro';
 import { getDict } from './i18n/index.js';
 import { SECTION_BY_ID } from '../index.js';
 
@@ -32,5 +33,7 @@ const accent = SECTION_BY_ID.rag.accent;
     <main>
       <slot />
     </main>
+
+    <Torty t={t} />
   </body>
 </html>
