@@ -39,6 +39,12 @@ const { t } = Astro.props;
     : (await import('../../i18n/en.js')).default;
   const L = dict.games.overfit;
 
+  // Scope every lookup to this game's own root: the board renders all six
+  // games on one page and document-wide queries collide (four [data-canvas],
+  // two [data-k]), so a game would drive another chapter's element.
+  const root = document.querySelector('[data-game="overfit"]');
+  const $ = (sel) => root.querySelector(sel);
+
   const RAW = [
     [0.2, 5.88], [0.67, 5.95], [1.14, 6.38], [1.61, 6.89], [2.08, 7.03], [2.55, 5.47], [3.02, 3.92],
     [3.49, 2.36], [3.96, 2.31], [4.43, 0.31], [4.9, 1.81], [5.37, 1.11], [5.84, 2.61], [6.31, 4.77],
@@ -89,8 +95,8 @@ const { t } = Astro.props;
   for (let d = 1; d <= 9; d++) { const co = fit(d); scores.push({ d, tr: rmse(co, TRAIN), te: rmse(co, TEST) }); }
   const BEST = scores.reduce((a, b) => (b.te < a.te ? b : a)).d;
 
-  const cv = document.querySelector('[data-canvas]');
-  const dIn = document.querySelector('[data-d]');
+  const cv = $('[data-canvas]');
+  const dIn = $('[data-d]');
 
   function draw() {
     const d = +dIn.value;
@@ -112,19 +118,19 @@ const { t } = Astro.props;
     TEST.forEach(([x, y]) => dot(ctx, sx(x), sy(y), cssVar('--canvas-amber') || '#ffbf69', 6, false));
 
     const s = scores[d - 1];
-    document.querySelector('[data-dv]').textContent = d;
-    document.querySelector('[data-tr]').textContent = s.tr.toFixed(2);
-    document.querySelector('[data-te]').textContent = s.te.toFixed(2);
+    $('[data-dv]').textContent = d;
+    $('[data-tr]').textContent = s.tr.toFixed(2);
+    $('[data-te]').textContent = s.te.toFixed(2);
     const cap = 4;
-    document.querySelector('[data-trbar]').style.width = Math.min(100, (s.tr / cap) * 100) + '%';
-    document.querySelector('[data-tebar]').style.width = Math.min(100, (s.te / cap) * 100) + '%';
+    $('[data-trbar]').style.width = Math.min(100, (s.tr / cap) * 100) + '%';
+    $('[data-tebar]').style.width = Math.min(100, (s.te / cap) * 100) + '%';
   }
 
   dIn.addEventListener('input', draw);
   window.addEventListener('resize', draw);
   draw();
 
-  document.querySelector('[data-lock]').addEventListener('click', () => {
+  $('[data-lock]').addEventListener('click', () => {
     const d = +dIn.value;
     if (d === BEST) {
       say(L.bestSay(d), 'party');

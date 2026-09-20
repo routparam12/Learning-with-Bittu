@@ -44,7 +44,10 @@ export const DEFAULT_QUESTION = DEFAULT_Q;
 export function setQuestion(q) {
   const next = (q || '').trim() || DEFAULT_Q;
   if (next === state.question) return;
-  state = { question: next, stages: {} }; // a new question invalidates every downstream output
+  // A new question invalidates every downstream stage output, but not the
+  // chosen pattern: rebuilding state from scratch dropped `pattern`, so the
+  // applied pattern stayed on screen and vanished on the next reload.
+  state = { ...state, question: next, stages: {} };
   save();
   emit();
 }

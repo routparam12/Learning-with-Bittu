@@ -2,7 +2,7 @@
    Language comes from the page (root.dataset.lang) because switching locale is
    a navigation to /en/… or /hi/…, not an in-place re-render. */
 
-import { parseInput, RUN, MAX_N } from './engine.js';
+import { parseInput, cmp, RUN, MAX_N } from './engine.js';
 import { META } from './meta.js';
 import { petSVG } from './pet.js';
 import * as sound from '../../../shared/scripts/audio.js';
@@ -147,8 +147,9 @@ export function mount(root, dict) {
     $('err').hidden = true;
 
     // Bar heights come from rank, not value, so letters and words work too.
-    const uniq = [...new Set(parsed.values)].sort((a, b) =>
-      (String(a).toLowerCase() < String(b).toLowerCase() ? -1 : String(a).toLowerCase() > String(b).toLowerCase() ? 1 : 0));
+    // Rank with the same cmp the algorithms use: stringifying here would order
+    // numbers lexicographically ("10" < "2") and the bars would contradict the sort.
+    const uniq = [...new Set(parsed.values)].sort(cmp);
     heights = new Map(uniq.map((v, k) => [v, 30 + (uniq.length < 2 ? 60 : (k / (uniq.length - 1)) * 96)]));
 
     // Widen the columns when the values are words rather than digits.
