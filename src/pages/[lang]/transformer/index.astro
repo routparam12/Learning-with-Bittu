@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../../sections/transformer/Layout.astro';
+import { DICTS, langPaths, href, type Lang } from '../../../sections/transformer/i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = Astro.params.lang as Lang;
+const d = DICTS[lang];
+---
+<BaseLayout lang={lang}>
+  <div id="app" data-lang={lang} data-home={`/${lang}/`}></div>
+  <p class="wrap foot">{d.site.foot}</p>
+</BaseLayout>
+
+<style>
+  .foot { font-family: var(--mono); font-size: 12px; color: var(--mute); padding-top: 0; }
+</style>
+
+<script>
+  import { mount } from '../../../sections/transformer/scripts/ui.js';
+
+  const el = document.querySelector('#app');
+  if (el) {
+    const dict = el.dataset.lang === 'hi'
+      ? (await import('../../../sections/transformer/i18n/hi')).hi
+      : (await import('../../../sections/transformer/i18n/en')).en;
+    // the real model is 10× the size of the simple one, so only fetch it on demand
+    mount(el, dict, {
+      simple: () => import('../../../sections/transformer/data/model-simple.json').then((m) => m.default),
+      real: () => import('../../../sections/transformer/data/model-real.json').then((m) => m.default),
+    });
+  }
+</script>

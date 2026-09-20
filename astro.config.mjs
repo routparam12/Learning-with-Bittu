@@ -25,5 +25,7 @@ export default defineConfig({
     '/searching-sorting/': '/en/searching-sorting/',
     '/rag': '/en/rag/',
     '/rag/': '/en/rag/',
+    '/transformer': '/en/transformer/',
+    '/transformer/': '/en/transformer/',
   },
 });
