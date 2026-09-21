@@ -26,6 +26,7 @@ export default {
     resetPattern: 'back to Basic RAG',
     currentPattern: 'Pattern:',
     withPattern: 'With {name}:',
+    petLabel: 'Torty the turtle — poke her for a recap of this stage',
   },
 
   hero: {

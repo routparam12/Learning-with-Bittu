@@ -3,6 +3,7 @@
 
 import { initRail } from './rail.js';
 import { initPatterns } from './pattern.js';
+import { initTurtle } from './turtle.js';
 import { subscribe, setQuestion, question, DEFAULT_QUESTION } from './pipeline.js';
 import { mirrorNotes, say } from '../../../shared/scripts/mascot.js';
 
@@ -17,6 +18,9 @@ export function boot() {
   if (data && Array.isArray(data.rail)) initRail(data.rail);
 
   initPatterns();
+
+  // Torty's shy reflex: she ducks into her shell when the cursor closes in.
+  initTurtle();
 
   // the question bar → pipeline store
   const form = document.querySelector('[data-qbar]');

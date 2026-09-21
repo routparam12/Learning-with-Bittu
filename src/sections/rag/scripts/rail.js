@@ -1,6 +1,10 @@
 /* rail.js — the vertical pipeline rail. A chain down the side of the page: one
-   dot per stage, lined up with that stage's heading. The pet turtle rides the
-   chain and settles on whichever stage you're reading, saying its one line.
+   dot per stage, lined up with that stage's heading. It fills in as you read
+   and marks where you are.
+
+   The pet does not live here: she is docked in the corner (Torty.astro), so the
+   rail simply calls say() when the current stage changes and she does the
+   talking from over there.
 
    It also reacts to a chosen RAG pattern (rag:pattern event): the stages that
    pattern changes get a marked dot, and looping patterns bend the rail. */
@@ -12,7 +16,6 @@ export function initRail(stages) {
   const list = document.getElementById('rail');
   const spine = document.querySelector('[data-railv-spine]');
   const fill = document.querySelector('[data-railv-fill]');
-  const turtle = document.querySelector('[data-railv-turtle]');
   const flowPath = document.querySelector('[data-railv-flow-path]');
   const flowLabel = document.querySelector('[data-railv-flow-label]');
   const page = document.querySelector('.rag-page');
@@ -56,7 +59,6 @@ export function initRail(stages) {
     spine.style.top = first + 'px';
     spine.style.height = (last - first) + 'px';
     paintFill();
-    if (current >= 0) turtle.style.top = dotYs[current] + 'px';
     drawFlow();
   }
 
@@ -74,7 +76,6 @@ export function initRail(stages) {
       el.classList.toggle('pending', idx > i);
     });
     paintFill();
-    if (dotYs[i] != null) turtle.style.top = dotYs[i] + 'px';
     if (changed && (armed || fromClick)) say(stages[i].preview, { hold: 4500 });
   }
 

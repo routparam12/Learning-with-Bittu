@@ -26,6 +26,7 @@ export default {
     resetPattern: 'wapas Basic RAG par',
     currentPattern: 'Pattern:',
     withPattern: '{name} ke saath:',
+    petLabel: 'Torty kachhua — is stage ka recap sunne ke liye poke karo',
   },
 
   hero: {

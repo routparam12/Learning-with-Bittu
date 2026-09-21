@@ -182,35 +182,6 @@ mark {
 .railv__stage:hover .railv__label { color: var(--teal); }
 .railv__stage:focus-visible { outline: 2px solid var(--teal); outline-offset: 4px; border-radius: 8px; }
 
-/* the pet turtle rides the chain */
-.railv__turtle {
-  position: absolute; left: -7px; top: 0; transform: translateY(-50%);
-  display: flex; align-items: flex-start; gap: 9px;
-  pointer-events: auto; z-index: 6;
-  transition: top .55s cubic-bezier(.34, 1.2, .5, 1);
-}
-.railv__turtlebtn { background: none; border: 0; padding: 0; cursor: pointer; display: block; width: 30px; height: 30px; flex: none; }
-.turtle { width: 30px; height: 30px; display: block; overflow: visible; }
-.turtle__shell { fill: var(--teal); stroke: color-mix(in srgb, var(--bg) 45%, var(--teal)); stroke-width: 1.2; }
-.turtle__shellline { stroke: color-mix(in srgb, var(--bg) 55%, var(--teal)); stroke-width: 1.4; fill: none; }
-.turtle__head, .turtle__leg, .turtle__tail { fill: var(--done); }
-.turtle__eye { fill: var(--bg); }
-.railv__bubble {
-  max-width: 220px; margin-top: -1px;
-  background: var(--panel); color: var(--ink);
-  border: 1px solid color-mix(in srgb, var(--teal) 45%, transparent);
-  border-radius: 10px; padding: 9px 11px;
-  font-size: 12.5px; line-height: 1.45;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
-}
-.railv__bubble[hidden] { display: none; }
-
-@media (prefers-reduced-motion: no-preference) {
-  .turtle__leg { transform-box: fill-box; transform-origin: center; animation: turtle-paddle 1.2s ease-in-out infinite; }
-  .turtle__leg--b { animation-delay: .6s; }
-  @keyframes turtle-paddle { 50% { transform: rotate(16deg) scaleY(.9); } }
-}
-
 /* tighter gutters → slim the rail; then drop the labels */
 @media (max-width: 1180px) {
   .railv { left: 16px; width: 148px; }
@@ -221,15 +192,9 @@ mark {
   .railv__spine { left: 12px; }
   .railv__stage { gap: 0; }
   .railv__dot { width: 13px; height: 13px; }
-  .railv__turtle { left: -2px; }
-  .railv__bubble {
-    position: fixed; left: 34px; bottom: 18px; z-index: 60; max-width: min(62vw, 260px);
-  }
   .col { padding-left: 40px; }
 }
 @media (max-width: 520px) {
-  .railv__turtlebtn { width: 24px; height: 24px; }
-  .turtle { width: 24px; height: 24px; }
 }
 
 /* ---------- the question bar ---------- */

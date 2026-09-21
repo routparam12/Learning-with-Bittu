@@ -1,8 +1,11 @@
 ---
 /* Vertical pipeline rail — a chain down the side of the page, one dot per stage
-   aligned to that stage's heading. The pet turtle rides the chain: it slides to
-   the stage you're reading and says that stage's line. rail.js positions the
-   dots, grows the fill, and moves the turtle. */
+   aligned to that stage's heading. rail.js positions the dots and grows the
+   fill as you read.
+
+   This is navigation only. The section's pet lives in the corner dock
+   (Torty.astro), the same place every section of the site puts its character;
+   rail.js just calls say() when the current stage changes. */
 interface Props { t: any; question: string }
 const { t } = Astro.props;
 ---
@@ -18,21 +21,4 @@ const { t } = Astro.props;
 
   <div class="railv__stages" id="rail" role="tablist" aria-label={t.ui.pipeline}></div>
 
-  <div class="railv__turtle" data-mascot data-railv-turtle aria-live="polite">
-    <button class="railv__turtlebtn" data-mascot-poke type="button" aria-label="Torty the turtle — poke for a recap">
-      <svg class="turtle" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
-        <ellipse class="turtle__leg turtle__leg--a" cx="11" cy="16" rx="4.6" ry="6.4"/>
-        <ellipse class="turtle__leg turtle__leg--b" cx="37" cy="16" rx="4.6" ry="6.4"/>
-        <ellipse class="turtle__leg turtle__leg--b" cx="11" cy="32" rx="4.6" ry="6.4"/>
-        <ellipse class="turtle__leg turtle__leg--a" cx="37" cy="32" rx="4.6" ry="6.4"/>
-        <path class="turtle__tail" d="M24 8 q-3 -4 0 -7 q3 3 0 7Z"/>
-        <circle class="turtle__head" cx="24" cy="41" r="6"/>
-        <circle class="turtle__eye" cx="21.6" cy="41.4" r="1.15"/>
-        <circle class="turtle__eye" cx="26.4" cy="41.4" r="1.15"/>
-        <circle class="turtle__shell" cx="24" cy="24" r="14.5"/>
-        <path class="turtle__shellline" d="M24 9.5v29M9.5 24h29M14 14l20 20M34 14L14 34"/>
-      </svg>
-    </button>
-    <div class="railv__bubble" data-mascot-bubble hidden></div>
-  </div>
 </nav>
