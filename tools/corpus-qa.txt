@@ -1,0 +1,192 @@
+what is your name|my name is bittu
+what is your name please|my name is bittu
+tell me your name|my name is bittu
+who are you|i am bittu your friend
+how are you|i am fine thank you
+how are you today|i am fine thank you
+how are you doing|i am very well thank you
+are you well|yes i am fine thank you
+are you fine|yes i am fine thank you
+how is your family|my family is fine thank you
+how is your family today|my family is fine thank you
+how is your mother|my mother is very well
+how is your friend|my friend is very well
+what is the weather today|it is raining today
+what is the weather like|it is raining today
+how is the weather|it is raining today
+how is the weather today|it is very cold today
+is it raining today|yes it is raining today
+is it raining now|yes it is raining today
+is it cold today|yes it is very cold today
+is it hot today|no it is very cold today
+is it sunny today|no it is raining today
+will it rain tomorrow|yes it will rain tomorrow
+will it be sunny tomorrow|yes it will be sunny tomorrow
+what is the sky like|the sky is grey today
+do you like cold weather|no i do not like cold weather
+do you like warm weather|yes i like warm weather
+what would you like|i would like some tea please
+what would you like to drink|i would like some tea please
+would you like some tea|yes i would like some tea please
+would you like some coffee|yes i would like some coffee please
+would you like some water|yes i would like some water please
+what do you drink in the morning|i drink tea in the morning
+what do you drink|i drink tea in the morning
+what do you eat for lunch|i eat rice for lunch
+what do you eat for breakfast|he eats bread for breakfast
+what is for lunch|i eat rice for lunch
+what is for dinner|i cook dinner every evening
+are you hungry|yes i am very hungry today
+are you hungry now|yes i am very hungry today
+are you thirsty|yes i would like some water please
+is the food ready|yes the food is ready
+is the tea ready|yes the tea is very hot
+is the rice ready|yes the rice is ready now
+how is the food|the food is very good
+who cooks at home|my mother cooks very well
+who cooks dinner|i cook dinner every evening
+when do you wake up|i wake up early every morning
+when do you wake up on sunday|i wake up late on sunday
+when do you sleep|i sleep early every night
+what do you do in the morning|i drink tea in the morning
+what do you do in the evening|i read a book every night
+what do you do on sunday|she cleans the house on sunday
+where do you live|i live in the city
+where do you live now|i live in the city
+where does she live|she lives near the market
+where is your house|my house is near the school
+where are you going|i am going to school
+where are you going now|i am going home now
+where is she going|she is going to the market
+where is the book|the book is on the table
+where is the cat|the cat is on the chair
+where is the dog|the dog runs in the garden
+how do you go to school|i go to school by bus
+how do you go to work|he goes to work by train
+how does she go to school|she goes to school by bus
+when will you come|i will come tomorrow
+when will you come home|i will come in the evening
+when will she come|she will come in the evening
+what is the time|the time is eight now
+what is the time now|the time is eight now
+when does the bus come|the bus comes at eight
+when does the train leave|the train leaves at nine
+when does the class start|the class is over now
+when is breakfast|breakfast is at eight
+when is lunch|lunch is at one
+why are you late|i am late because the bus was late
+why are you late today|i am late because of the rain
+why is she late|she is late because of the rain
+are you tired|yes i am tired after work
+are you tired today|yes i am tired tonight
+are you happy|yes i am happy today
+are you sad|no i am not sad now
+are you busy|yes i am busy at work
+are you busy today|yes i am busy today
+are you free tomorrow|yes i am free tomorrow
+are you free today|no i am busy today
+are you sleepy|yes i am sleepy now
+are you ready|yes everything is ready now
+is everything all right|yes everything is all right
+is everything ready|yes everything is ready now
+how many books do you have|i have three books
+how many bags does she have|she has two bags
+how many cars does he have|he has one car
+do you have money|yes i have some money
+does she have money|no she has no money today
+do you have a car|yes we have a new car
+do you know her name|yes i know her name
+do you know my name|yes he knows my name
+do you know this place|yes we know this place
+do you understand|yes i understand now
+does she understand|no she does not understand
+what is your work|i work in the city
+where do you work|i work in the city
+where does she work|she works in a shop
+where does he work|he works in an office
+what does your teacher do|the teacher reads to the class
+who is your teacher|my teacher is very kind
+what do you study|i study at home every evening
+where do you study|he studies in the library
+do you like music|yes i like music very much
+do you like to sing|yes he likes to sing
+what do you watch|i watch television at night
+how is the film|the film is very good
+is the film long|yes the film is very long
+what do you read|i read a book every night
+how is the book|the book is very good
+where do you read|we read together after dinner
+what do you buy at the market|we buy fruit at the market
+where do you buy bread|they buy bread at the shop
+is the shop open|no the shop is closed today
+when does the shop open|the shop opens at nine
+is the market busy|yes the market is very busy today
+is the price high|no the price is not high
+who do you help|i help my mother every day
+can you help me|yes please come in
+will you help me|yes i will come tomorrow
+do you love your family|yes i love my family
+what do you love|he loves music
+what does she love|she loves her garden
+what do you want|i want some water
+what does she want|she wants a new bag
+what does he want|he wants to go home
+what do you need|i need some help
+what does she need|she needs a new book
+is there water in the glass|no there is no water in the glass
+is there time now|no there is no time now
+what is in the garden|there is a cat in the garden
+what is on the table|there are many books on the table
+how many chairs are in the room|there are three chairs in the room
+is the window open|yes the window is open
+is the door closed|yes the door is closed
+is the room clean|yes the room is very clean
+is the house big|yes the house is very big
+where is the house|the house is near the market
+is the car new|no my car is not new
+is the road busy|yes the road is very busy
+what are the children doing|the children are playing in the garden
+what is the baby doing|the baby is sleeping
+what is the boy doing|the boy is playing
+what is the girl doing|the girl is reading
+what is the bird doing|the bird sings in the morning
+what do you play|i play with my friends
+when do you play|we play together on sunday
+what are you learning|i am learning english
+what is she learning|she is learning to cook
+what is he learning|he is learning to drive
+is learning easy|no learning is not easy
+is the work easy|no the work is not easy
+is the work done|yes the work is done now
+good morning|good morning my friend
+good evening|good evening how are you
+good night|good night sleep well
+hello|hello how are you today
+thank you|you are very kind
+thank you very much|you are very kind
+see you tomorrow|see you tomorrow morning
+nice to meet you|nice to meet you
+i am sorry|it is not your fault
+sorry i am late|it is not your fault
+what day is today|today is sunday
+what day is tomorrow|tomorrow is monday
+what day was yesterday|yesterday was saturday
+how was your day|it was a very good day
+how was the weather yesterday|it was raining yesterday
+how was the film|the film was very good
+what did you have for lunch|she had rice for lunch
+what did you have for breakfast|he had bread for breakfast
+what did you drink|i had tea in the morning
+shall we go|let us go together
+shall we eat|let us eat now
+shall we go home|let us go home
+can you come with me|come with me please
+can you wait|wait for me please
+who are you waiting for|i am waiting for you
+where is she waiting|she is waiting at home
+what is wrong|something is wrong today
+is anything wrong|nothing is ready now
+what is your favourite drink|i drink tea in the morning
+what is your favourite food|the food is very good
+do you want tea or water|i would like some tea please
+do you want to go home|he wants to go home

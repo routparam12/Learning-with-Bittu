@@ -48,6 +48,12 @@ const { t } = Astro.props;
     : (await import('../../i18n/en.js')).default;
   const L = dict.games.label;
 
+  // Scope every lookup to this game's own root: the board renders all six
+  // games on one page and document-wide queries collide (four [data-canvas],
+  // two [data-k]), so a game would drive another chapter's element.
+  const root = document.querySelector('[data-game="label"]');
+  const $ = (sel) => root.querySelector(sel);
+
   const TRAIN = [
     'WINNER!! Claim your free prize now — click here',
     'Are we still on for lunch at 1?',
@@ -64,10 +70,10 @@ const { t } = Astro.props;
   ];
 
   const labels = new Array(TRAIN.length).fill(null);
-  const trainEl = document.querySelector('[data-train]');
-  const testEl = document.querySelector('[data-test]');
-  const btn = document.querySelector('[data-train-btn]');
-  const results = document.querySelector('[data-results]');
+  const trainEl = $('[data-train]');
+  const testEl = $('[data-test]');
+  const btn = $('[data-train-btn]');
+  const results = $('[data-results]');
 
   trainEl.innerHTML = TRAIN.map((tx, i) => `
     <div class="row">
@@ -88,7 +94,7 @@ const { t } = Astro.props;
     btn.disabled = labels.includes(null);
   });
 
-  document.querySelector('[data-clear]').addEventListener('click', () => {
+  $('[data-clear]').addEventListener('click', () => {
     labels.fill(null);
     trainEl.querySelectorAll('button[data-i]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     btn.disabled = true;
@@ -115,7 +121,7 @@ const { t } = Astro.props;
         <span class="verdict ${p === truth ? 'ok' : 'no'}">Bittu → ${L.says(p)} ${p === truth ? '✓' : '✗'}</span></div>`;
     }).join('');
     results.hidden = false;
-    document.querySelector('[data-tscore]').textContent = `${right} / 3`;
+    $('[data-tscore]').textContent = `${right} / 3`;
 
     const honest = labels.every((l, i) => l === TRUTH[i]);
     if (right === 3) {

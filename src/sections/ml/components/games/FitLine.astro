@@ -39,15 +39,21 @@ const { t } = Astro.props;
     : (await import('../../i18n/en.js')).default;
   const L = dict.games.fit;
 
+  // Scope every lookup to this game's own root: the board renders all six
+  // games on one page and document-wide queries collide (four [data-canvas],
+  // two [data-k]), so a game would drive another chapter's element.
+  const root = document.querySelector('[data-game="fit"]');
+  const $ = (sel) => root.querySelector(sel);
+
   const AREA = [45, 58, 66, 72, 85, 96, 104, 118, 130, 145, 162, 185];
   const NOISE = [3.1, -4.2, 2.6, -1.4, 5.0, -3.6, 1.1, 4.4, -5.1, 2.0, -2.4, 3.3];
   const PTS = AREA.map((x, i) => ({ x, y: +(0.34 * x + 11 + NOISE[i]).toFixed(1) }));
 
-  const cv = document.querySelector('[data-canvas]');
-  const wIn = document.querySelector('[data-w]');
-  const bIn = document.querySelector('[data-b]');
-  const mseOut = document.querySelector('[data-mse]');
-  const predOut = document.querySelector('[data-pred]');
+  const cv = $('[data-canvas]');
+  const wIn = $('[data-w]');
+  const bIn = $('[data-b]');
+  const mseOut = $('[data-mse]');
+  const predOut = $('[data-pred]');
 
   // closed-form best fit, used only to set a fair target
   const n = PTS.length;
@@ -57,7 +63,7 @@ const { t } = Astro.props;
   const B = my - W * mx;
   const cost = (w, b) => PTS.reduce((s, p) => s + (p.y - (w * p.x + b)) ** 2, 0) / n;
   const GOAL = cost(W, B) * 1.15;
-  document.querySelector('[data-goal]').textContent = GOAL.toFixed(1);
+  $('[data-goal]').textContent = GOAL.toFixed(1);
 
   const X0 = 0, X1 = 200, Y0 = 0, Y1 = 90;
   let solved = false;
@@ -85,8 +91,8 @@ const { t } = Astro.props;
     PTS.forEach((p) => dot(ctx, sx(p.x), sy(p.y), cssVar('--canvas-dot') || '#cdf5da', 5));
 
     const c = cost(w, b);
-    document.querySelector('[data-wv]').textContent = w.toFixed(3);
-    document.querySelector('[data-bv]').textContent = b.toFixed(1);
+    $('[data-wv]').textContent = w.toFixed(3);
+    $('[data-bv]').textContent = b.toFixed(1);
     mseOut.textContent = c.toFixed(1);
     mseOut.parentElement.classList.toggle('readout--bad', c > GOAL);
     predOut.textContent = '₹' + (w * 120 + b).toFixed(1) + ' lakh';
@@ -102,8 +108,11 @@ const { t } = Astro.props;
   window.addEventListener('resize', draw);
   draw();
 
-  document.querySelector('[data-gd]').addEventListener('click', () => {
-    let w = +wIn.value, b = +bIn.value, step = 0;
+  let descending = false;
+  $('[data-gd]').addEventListener('click', () => {
+    if (descending) return;                 // one descent at a time
+    descending = true;
+    let w = +wIn.value, b = +bIn.value, step = 0, prev = Infinity;
     say(L.gdSay, 'think');
     const loop = () => {
       for (let i = 0; i < 12; i++) {
@@ -113,7 +122,14 @@ const { t } = Astro.props;
         step++;
       }
       wIn.value = w; bIn.value = b; draw();
-      if (step < 900) requestAnimationFrame(loop);
+      // Run until the squared errors stop shrinking, which is what the copy
+      // promises. A fixed step budget stopped short of the target (~1100 steps
+      // needed, 900 spent), so the button never finished its own demo.
+      const c = cost(w, b);
+      const settled = prev - c < 1e-4;
+      prev = c;
+      if (!settled && step < 20000) requestAnimationFrame(loop);
+      else descending = false;
     };
     requestAnimationFrame(loop);
   });

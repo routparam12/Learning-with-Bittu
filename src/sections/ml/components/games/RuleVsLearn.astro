@@ -55,18 +55,24 @@ const { t } = Astro.props;
     : (await import('../../i18n/en.js')).default;
   const L = dict.games.rules;
 
+  // Scope every lookup to this game's own root: the board renders all six
+  // games on one page and document-wide queries collide (four [data-canvas],
+  // two [data-k]), so a game would drive another chapter's element.
+  const root = document.querySelector('[data-game="rules"]');
+  const $ = (sel) => root.querySelector(sel);
+
   const DATA = [
     [30, 2], [80, 1], [85, 4], [45, 7], [50, 8], [70, 5],
     [65, 3], [90, 9], [25, 9], [95, 2], [40, 4], [75, 6],
   ].map(([size, spikes]) => ({ size, spikes, wug: 0.6 * size + 4.2 * spikes >= 62 }));
 
-  const zoo = document.querySelector('[data-zoo]');
-  const sizeIn = document.querySelector('[data-size]');
-  const spikeIn = document.querySelector('[data-spikes]');
-  const sOut = document.querySelector('[data-s]');
-  const kOut = document.querySelector('[data-k]');
-  const score = document.querySelector('[data-score]');
-  const bestOut = document.querySelector('[data-best]');
+  const zoo = $('[data-zoo]');
+  const sizeIn = $('[data-size]');
+  const spikeIn = $('[data-spikes]');
+  const sOut = $('[data-s]');
+  const kOut = $('[data-k]');
+  const score = $('[data-score]');
+  const bestOut = $('[data-best]');
   let touched = false;
 
   function creatureSVG(c, pred) {
@@ -107,13 +113,23 @@ const { t } = Astro.props;
   [sizeIn, spikeIn].forEach((el) => el.addEventListener('input', () => { touched = true; render(); }));
   render();
 
-  document.querySelector('[data-learn]').addEventListener('click', () => {
+  $('[data-learn]').addEventListener('click', () => {
     if (!touched) { say(L.tryFirst, 'oops'); return; }
     const mine = evaluate(+sizeIn.value, +spikeIn.value);
-    let best = { S: 20, K: 0, n: -1, tried: 0 };
+    // Search exactly the grid the sliders can land on. Stepping finer than the
+    // control finds rules it cannot hold (size 46 snaps back to 45), so the
+    // readout would claim a score the board no longer shows.
+    const grid = (el) => {
+      const min = +el.min, max = +el.max, step = +el.step || 1;
+      const out = [];
+      for (let i = 0; min + i * step <= max + 1e-9; i++) out.push(min + i * step);
+      return out;
+    };
+    const SIZES = grid(sizeIn), SPIKES = grid(spikeIn);
+    let best = { S: SIZES[0], K: SPIKES[0], n: -1, tried: 0 };
     const t0 = performance.now();
-    for (let S = 20; S <= 100; S += 1) {
-      for (let K = 0; K <= 10; K += 1) {
+    for (const S of SIZES) {
+      for (const K of SPIKES) {
         best.tried++;
         const n = evaluate(S, K);
         if (n > best.n) best = { S, K, n, tried: best.tried };
