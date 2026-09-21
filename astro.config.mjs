@@ -22,10 +22,7 @@ export default defineConfig({
   // Bare, unprefixed entry points for each non-default section.
   redirects: {
     '/searching-sorting': '/en/searching-sorting/',
-    '/searching-sorting/': '/en/searching-sorting/',
     '/rag': '/en/rag/',
-    '/rag/': '/en/rag/',
     '/transformer': '/en/transformer/',
-    '/transformer/': '/en/transformer/',
   },
 });
