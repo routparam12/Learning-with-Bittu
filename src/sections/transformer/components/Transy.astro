@@ -1,0 +1,50 @@
+---
+/* Transy — the transformer lab's little terminal pet. It keeps the latest
+   step explanation, then tells it back when the reader pokes it. */
+interface Props { name: string; tips: string[] }
+const { name, tips } = Astro.props;
+---
+<div class="transy-dock" data-transy data-mood="idle" aria-live="polite">
+  <div class="transy-bubble" data-transy-bubble hidden></div>
+  <button class="transy" data-transy-poke type="button" aria-label={name} title={name}>
+    <img src="/images/transy-bsod.png" alt="" />
+    <span>TRANSY</span>
+  </button>
+</div>
+
+<style>
+  .transy-dock{position:fixed;right:clamp(9px,2vw,24px);bottom:clamp(9px,2vw,22px);z-index:60;display:flex;align-items:flex-end;gap:10px;pointer-events:none}
+  .transy-bubble{max-width:min(48ch,70vw);padding:11px 14px;border:1px solid #4ba5ff;border-radius:12px;background:var(--panel);box-shadow:0 10px 30px var(--shadow);color:var(--chalk);font-size:13px;line-height:1.5;white-space:pre-line;pointer-events:auto}
+  .transy{width:clamp(74px,10vw,104px);padding:0;border:0;background:none;color:var(--pet);font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.18em;cursor:pointer;pointer-events:auto;animation:transy-float 3.2s ease-in-out infinite}
+  .transy img{width:100%;display:block;image-rendering:pixelated;filter:drop-shadow(0 4px 8px rgba(52,157,255,.35));mix-blend-mode:screen}.transy-dock[data-mood="think"] .transy{animation:transy-think .65s ease-in-out infinite alternate}.transy-dock[data-mood="pick"] .transy{animation:transy-hop .5s ease-in-out 2}.transy-dock[data-mood="done"] .transy{animation:transy-hop .4s ease-in-out 3}
+  @keyframes transy-float{50%{transform:translateY(-6px)}}@keyframes transy-think{to{filter:brightness(1.2)}}@keyframes transy-hop{50%{transform:translateY(-13px) rotate(-4deg)}}
+  @media (max-width:620px){.transy-dock{flex-direction:column;align-items:flex-end}.transy-bubble{max-width:78vw}}
+</style>
+
+<script define:vars={{ tips }}>
+  const dock = document.querySelector('[data-transy]');
+  const bubble = document.querySelector('[data-transy-bubble]');
+  const poke = document.querySelector('[data-transy-poke]');
+  let context = '';
+  let example = '';
+  let mood = 'idle';
+  let tip = 0;
+  let timer;
+
+  function speak(text, nextMood = 'think') {
+    if (!dock || !bubble || !text) return;
+    clearTimeout(timer);
+    mood = nextMood;
+    dock.dataset.mood = mood;
+    bubble.textContent = example ? `${text}\n\nCode example\n${example}` : text;
+    bubble.hidden = false;
+    timer = setTimeout(() => { bubble.hidden = true; dock.dataset.mood = 'idle'; }, 6500);
+  }
+
+  window.addEventListener('transy:context', (event) => {
+    context = event.detail?.text || context;
+    example = event.detail?.example || example;
+    mood = event.detail?.mood || 'think';
+  });
+  poke?.addEventListener('click', () => speak(context || tips[tip++ % tips.length], mood));
+</script>

@@ -1,3 +1,5 @@
 ---
-return Astro.redirect('/en/');
+// Production landing page: serve English directly at / with no extra request.
+import Board from '../sections/ml/components/Board.astro';
 ---
+<Board locale="en" />

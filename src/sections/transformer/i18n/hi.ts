@@ -50,6 +50,21 @@ export const hi: Dict = {
     temperature: 'Randomness',
     greedy: 'band · hamesha sabse upar wala shabd',
     note: 'Bittu ka note',
+    learningPaths: 'Transformer seekhne ke raaste',
+    productionKicker: 'Production inference',
+    workingTitle: 'Transformer working',
+    workingDesc: 'Pura production safar dekho: text andar jaata hai, ek token baahar aata hai, aur loop phir shuru hota hai.',
+    showFlow: 'Pura production flow dekho',
+    hideFlow: 'Production flow chhupao',
+    readProduction: 'End-to-end production guide padho',
+    layerKicker: 'Layers + code',
+    architectureTitle: 'Transformer architecture',
+    architectureDesc: 'Live model ko step by step dekho: hidden states, causal attention, feed-forward layers, residuals, logits aur code.',
+    openLab: 'Interactive layer lab kholo',
+    exploreReference: 'Architecture reference dekho',
+    transformerBlocks: 'TRANSFORMER BLOCKS',
+    transformerBlocksHint: 'causal self-attention + feed-forward',
+    transyName: 'Transy — is step ki explanation ke liye tap karo',
     codeTitle: 'Code kya kar raha hai',
     streamTitle: 'Residual stream',
     streamHint: 'har token ki ek row · har dimension ka ek column',
@@ -143,6 +158,56 @@ export const hi: Dict = {
   },
 
   say: {
+    overviewBefore:
+      'Transformer blocks se pehle:\n' +
+      'TOKENIZER\n' +
+      '  ↓\n' +
+      'TOKEN IDs\n' +
+      '  ↓\n' +
+      'TOKEN EMBEDDINGS\n' +
+      '  ↓\n' +
+      'POSITION INFORMATION\n' +
+      '  ↓\n' +
+      'INITIAL HIDDEN STATES X₀',
+    overviewAfter:
+      'Transformer blocks ke baad:\n' +
+      'FINAL HIDDEN STATES\n' +
+      '  ↓\n' +
+      'LAST-POSITION REPRESENTATION\n' +
+      '  ↓\n' +
+      'LM HEAD\n' +
+      '  ↓\n' +
+      'LOGITS\n' +
+      '  ↓\n' +
+      'SOFTMAX\n' +
+      '  ↓\n' +
+      'PROBABILITY DISTRIBUTION\n' +
+      '  ↓\n' +
+      'DECODING / SAMPLING\n' +
+      '  ↓\n' +
+      'NEXT TOKEN\n' +
+      '  ↓\n' +
+      'APPEND TOKEN\n' +
+      '  ↓\n' +
+      'REPEAT\n' +
+      '  ↓\n' +
+      'EOS / STOP\n' +
+      '  ↓\n' +
+      'DETOKENIZATION\n' +
+      '  ↓\n' +
+      'FINAL TEXT',
+    inferenceLoop:
+      'GPT-3 complicated lagta hai kyunki usmein billions of learned parameters aur bahut Transformer layers hoti hain.\n\n' +
+      'Lekin fundamental inference loop bahut saaf hai:\n\n' +
+      '1. Text ko tokens mein badlo.\n' +
+      '2. Tokens ko vectors mein badlo.\n' +
+      '3. Vectors ko Transformer blocks se guzaro.\n' +
+      '4. Previous context ke liye causal self-attention istemaal karo.\n' +
+      '5. Vocabulary ke logits banao.\n' +
+      '6. Logits ko probabilities mein badlo.\n' +
+      '7. Agla token chuno.\n' +
+      '8. Use sequence mein jodo.\n' +
+      '9. Generation rukne tak dohrao.',
     tokenize: (n: V, unk: V) =>
       `Pehle sentence ko tokens mein kaata jaata hai aur har ek ko vocabulary mein dhoonda jaata hai. ${n} tokens.` +
       (Number(unk) > 0 ? ` Inme se ${unk} meri vocabulary mein nahi hain, to woh <unk> ban gaye — woh shabd main sach mein nahi jaanta.` : ''),
@@ -187,6 +252,34 @@ export const hi: Dict = {
       `Yahi jawaab hai, ${n} shabd ka, har ek ${l} block${Number(l) > 1 ? 's' : ''} ka poora chakkar. Model ne kahin se jawaab "dhoonda" nahi — bas baar baar agla shabd predict kiya jab tak usne rukne ka faisla nahi kiya.`,
     done: (n: V, l: V) =>
       `Yahi poori machine hai: ${n} shabd likhe, har ek ${l} block${Number(l) > 1 ? 's' : ''} ka poora chakkar. Asli models bilkul yahi karte hain, bas kahin zyada chaude aur kahin zyada baar.`,
+  },
+
+  transyTips: [
+    'Main Transy hoon, aapka chhota transformer terminal. Model ko step karte waqt mujhe tap karo aur main current operation samjhaunga.',
+    'Network ke andar tokens nahi badalte. Unke hidden-state vectors badalte hain.',
+    'Causal attention token ko sirf khud aur pehle ke tokens dekhne deta hai — future ko kabhi nahi.',
+  ],
+
+  transyExamples: {
+    default: 'x = transformer(x)',
+    tokenize: 'ids = tokenizer("the weather is")',
+    embed: 'x = tokenEmbedding[ids]',
+    pos: 'x0 = tokenEmbedding[ids] + positionEmbedding[position]',
+    qkv: 'q, k, v = x @ Wq, x @ Wk, x @ Wv',
+    scores: 'scores = q @ k.T / Math.sqrt(headSize)',
+    mask: 'scores[futurePositions] = -Infinity',
+    attnsoftmax: 'weights = softmax(scores)',
+    weighted: 'context = weights @ v',
+    proj: 'attentionOut = context @ Wo',
+    res1: 'x = x + attentionOut',
+    mlpup: 'hidden = gelu(x @ Wfc + bfc)',
+    res2: 'x = x + hidden @ Wproj + bproj',
+    logits: 'logits = x[lastPosition] @ Wvocab',
+    probs: 'probabilities = softmax(logits)',
+    sample: 'nextId = sample(probabilities, temperature)',
+    append: 'ids = [...ids, nextId]',
+    eos: 'if (nextId === EOS) stop()',
+    done: 'text = detokenize(ids)',
   },
 
   models: {

@@ -1,4 +1,4 @@
-/* en.ts — English dictionary for the Transformer section.
+﻿/* en.ts — English dictionary for the Transformer section.
    SOURCE OF TRUTH for the `Dict` type: hi.ts must match this shape exactly.
 
    Every key the engine emits is namespaced (tag. / say. / panel. / work. / err.)
@@ -19,7 +19,7 @@ export const en = {
     kicker: 'One step. One reason. Every time.',
     heroA: 'Watch a transformer',
     heroEm: 'actually think',
-    heroSub: 'Type a sentence, press Next, and every step of the forward pass plays out in order — tokens, embeddings, attention, the feed-forward net, and finally the next word. Then it loops and writes the word after that. Switch the task to “answer a question” and the same loop becomes a reply — the only thing that changes is the tokens you put in front of it.',
+    heroSub: 'Type a sentence, press Next, and every step of the forward pass plays out in order — tokens, embeddings, attention, the feed-forward net, and finally the next word. Then it loops and writes the word after that. Switch the task to "answer a question" and the same loop becomes a reply — the only thing that changes is the tokens you put in front of it.',
     foot: 'Every number on this page was computed here, from your sentence, by the weights in this repo. Nothing is canned.',
   },
 
@@ -48,7 +48,22 @@ export const en = {
     modelHint: 'Simple is small enough to read every number. Real is the same machine, bigger.',
     temperature: 'Randomness',
     greedy: 'off · always the top word',
-    note: 'Bittu’s note',
+    note: "Bittu's note",
+    learningPaths: 'Transformer learning paths',
+    productionKicker: 'Production inference',
+    workingTitle: 'Transformer working',
+    workingDesc: 'Trace the complete production journey: text enters, one token leaves, and the loop begins again.',
+    showFlow: 'Trace the full production flow',
+    hideFlow: 'Hide the production flow',
+    readProduction: 'Read the end-to-end production guide',
+    layerKicker: 'Layers + code',
+    architectureTitle: 'Transformer architecture',
+    architectureDesc: 'Step through the live model: hidden states, causal attention, feed-forward layers, residuals, logits, and code.',
+    openLab: 'Open the interactive layer lab',
+    exploreReference: 'Explore the architecture reference',
+    transformerBlocks: 'TRANSFORMER BLOCKS',
+    transformerBlocksHint: 'causal self-attention + feed-forward',
+    transyName: 'Transy — tap me to explain this step',
     codeTitle: 'What the code is doing',
     streamTitle: 'The residual stream',
     streamHint: 'one row per token · one column per dimension',
@@ -65,7 +80,7 @@ export const en = {
     dims: 'width',
     head: 'head',
     kbdHint: 'Keyboard: ← → to step, Space to auto-play, W for the next word',
-    unkNote: 'Words outside the vocabulary become <unk> — that really is what happens.',
+    unkNote: 'Words outside the vocabulary become 那些 — that really is what happens.',
     repeatNote: 'A real LLM repeats this block 32–96 times with billions of parameters. Same shape, more of it.',
     legend: 'What the colours mean',
     legNew: 'Word the model wrote',
@@ -142,9 +157,59 @@ export const en = {
   },
 
   say: {
+    overviewBefore:
+      'Before the Transformer blocks:\n' +
+      'TOKENIZER\n' +
+      '  ↓\n' +
+      'TOKEN IDs\n' +
+      '  ↓\n' +
+      'TOKEN EMBEDDINGS\n' +
+      '  ↓\n' +
+      'POSITION INFORMATION\n' +
+      '  ↓\n' +
+      'INITIAL HIDDEN STATES X₀',
+    overviewAfter:
+      'After the Transformer blocks:\n' +
+      'FINAL HIDDEN STATES\n' +
+      '  ↓\n' +
+      'LAST-POSITION REPRESENTATION\n' +
+      '  ↓\n' +
+      'LM HEAD\n' +
+      '  ↓\n' +
+      'LOGITS\n' +
+      '  ↓\n' +
+      'SOFTMAX\n' +
+      '  ↓\n' +
+      'PROBABILITY DISTRIBUTION\n' +
+      '  ↓\n' +
+      'DECODING / SAMPLING\n' +
+      '  ↓\n' +
+      'NEXT TOKEN\n' +
+      '  ↓\n' +
+      'APPEND TOKEN\n' +
+      '  ↓\n' +
+      'REPEAT\n' +
+      '  ↓\n' +
+      'EOS / STOP\n' +
+      '  ↓\n' +
+      'DETOKENIZATION\n' +
+      '  ↓\n' +
+      'FINAL TEXT',
+    inferenceLoop:
+      'GPT-3 looks complicated because the system contains billions of learned parameters and many Transformer layers.\n\n' +
+      'But the fundamental inference loop is surprisingly clean:\n\n' +
+      '1. Convert text into tokens.\n' +
+      '2. Convert tokens into vectors.\n' +
+      '3. Pass those vectors through Transformer blocks.\n' +
+      '4. Use causal self-attention to incorporate previous context.\n' +
+      '5. Produce logits over the vocabulary.\n' +
+      '6. Convert logits into probabilities.\n' +
+      '7. Select the next token.\n' +
+      '8. Append it to the sequence.\n' +
+      '9. Repeat until generation stops.',
     tokenize: (n: V, unk: V) =>
       `First the sentence is chopped into tokens and each one is looked up in the vocabulary. ${n} tokens.` +
-      (Number(unk) > 0 ? ` ${unk} of them are not in my vocabulary, so they become <unk> — I genuinely do not know those words.` : ''),
+      (Number(unk) > 0 ? ` ${unk} of them are not in my vocabulary, so they become 那些 — I genuinely do not know those words.` : ''),
     embed: (d: V) =>
       `Every token id becomes a vector of ${d} numbers. This is the token's whole meaning as far as the model is concerned — think of it as a student walking in with an opinion.`,
     pos: 'Now I add a position vector. The same word in slot 1 and slot 5 must not look identical, because word order matters.',
@@ -176,7 +241,7 @@ export const en = {
     probs: 'Softmax turns those scores into probabilities. This is the model\'s honest opinion about what comes next.',
     sampleGreedy: 'Randomness is off, so I simply take the highest one.',
     sampleSkip: (w: V) =>
-      `The top slot is "${w}", which is a special token, not a word — <unk> means "a word nobody taught me". I leave it in the chart because it is my honest opinion, but I write out the best real word instead.`,
+      `The top slot is "${w}", which is a special token, not a word — 那些 means "a word nobody taught me". I leave it in the chart because it is my honest opinion, but I write out the best real word instead.`,
     sampleTemp: (t: V) => `Randomness is at ${t}, so I roll a weighted die instead of always taking the top word.`,
     eos: 'The model picked <eos> — its way of saying the sentence is finished. Stopping here.',
     eosAnswer: 'The model picked <eos>. That is how an answer ends: nobody tells it how long to be — it decides it is finished and the loop stops.',
@@ -186,6 +251,34 @@ export const en = {
       `That is the answer, ${n} word${Number(n) === 1 ? '' : 's'} of it, each one a full pass through ${l} block${Number(l) > 1 ? 's' : ''}. The model never "looked up" an answer — it predicted the next word over and over until it decided to stop.`,
     done: (n: V, l: V) =>
       `That is the whole machine: ${n} word${Number(n) === 1 ? '' : 's'} written, each one a full pass through ${l} block${Number(l) > 1 ? 's' : ''}. Real models do the identical thing, just much wider and far more often.`,
+  },
+
+  transyTips: [
+    'I am Transy, your tiny transformer terminal. Tap me while stepping through the model and I will explain the current operation.',
+    'The tokens never change inside the network. Their hidden-state vectors do.',
+    'Causal attention only allows a token to read itself and earlier tokens — never the future.',
+  ],
+
+  transyExamples: {
+    default: 'x = transformer(x)',
+    tokenize: 'ids = tokenizer("the weather is")',
+    embed: 'x = tokenEmbedding[ids]',
+    pos: 'x0 = tokenEmbedding[ids] + positionEmbedding[position]',
+    qkv: 'q, k, v = x @ Wq, x @ Wk, x @ Wv',
+    scores: 'scores = q @ k.T / Math.sqrt(headSize)',
+    mask: 'scores[futurePositions] = -Infinity',
+    attnsoftmax: 'weights = softmax(scores)',
+    weighted: 'context = weights @ v',
+    proj: 'attentionOut = context @ Wo',
+    res1: 'x = x + attentionOut',
+    mlpup: 'hidden = gelu(x @ Wfc + bfc)',
+    res2: 'x = x + hidden @ Wproj + bproj',
+    logits: 'logits = x[lastPosition] @ Wvocab',
+    probs: 'probabilities = softmax(logits)',
+    sample: 'nextId = sample(probabilities, temperature)',
+    append: 'ids = [...ids, nextId]',
+    eos: 'if (nextId === EOS) stop()',
+    done: 'text = detokenize(ids)',
   },
 
   models: {

@@ -45,7 +45,33 @@ function shell(d, homeHref) {
     <ul class="chips" id="badge"></ul>
   </header>
 
-  <section class="setup">
+  <section class="learning-cards" aria-label="${esc(d.ui.learningPaths)}">
+    <article class="learning-card working-card" id="working-card">
+      <p class="card-kicker">01 · ${esc(d.ui.productionKicker)}</p>
+      <h2>${esc(d.ui.workingTitle)}</h2>
+      <p>${esc(d.ui.workingDesc)}</p>
+      <button class="path-action" id="showflow" type="button" aria-expanded="false">${esc(d.ui.showFlow)}</button>
+      <div class="production-flow" id="production-flow" hidden>
+        <pre>${esc(d.say.overviewBefore)}</pre>
+        <div class="block-divider">${esc(d.ui.transformerBlocks)}<br><small>${esc(d.ui.transformerBlocksHint)}</small></div>
+        <pre>${esc(d.say.overviewAfter)}</pre>
+        <p class="loop-copy">${esc(d.say.inferenceLoop)}</p>
+        <a class="reference-link" href="https://paramjeetrout.substack.com/p/gpt-3-end-to-end-what-actually-happens" target="_blank" rel="noreferrer">${esc(d.ui.readProduction)} ↗</a>
+      </div>
+    </article>
+    <article class="learning-card model-card">
+      <p class="card-kicker">02 · ${esc(d.ui.layerKicker)}</p>
+      <h2>${esc(d.ui.architectureTitle)}</h2>
+      <p>${esc(d.ui.architectureDesc)}</p>
+      <div class="layer-mini-diagram" aria-hidden="true">
+        <span>X₀</span><i>→</i><span>ATTN</span><i>→</i><span>FFN</span><i>→</i><span>LOGITS</span>
+      </div>
+      <button class="path-action" id="openlab" type="button">${esc(d.ui.openLab)}</button>
+      <a class="reference-link" href="https://bbycroft.net/llm" target="_blank" rel="noreferrer">${esc(d.ui.exploreReference)} ↗</a>
+    </article>
+  </section>
+
+  <section class="setup" id="architecture-lab">
     <div class="field wide">
       <span>${esc(d.ui.mode)}</span>
       <div class="seg" id="modesw" role="group">
@@ -291,6 +317,9 @@ export function mount(root, dict, loaders) {
     $('prev').disabled = i === 0;
     $('next').disabled = i === frames.length - 1;
     $('word').disabled = i === frames.length - 1;
+    const transyMood = f.stage === 'done' ? 'done' : f.stage === 'sample' || f.stage === 'append' ? 'pick' : 'think';
+    const transyExample = d.transyExamples[f.stage] || d.transyExamples.default;
+    window.dispatchEvent(new CustomEvent('transy:context', { detail: { text: tr(d, f.say), example: transyExample, mood: transyMood } }));
     const cue = f.picked ? 'lock' : f.stage === 'attnsoftmax' ? 'pop' : f.stage === 'append' ? 'write' : 'compare';
     sound.play(cue);
   }
@@ -324,6 +353,14 @@ export function mount(root, dict, loaders) {
 
   /* ── wiring ── */
   $('run').onclick = () => { sound.resumeIfEnabled(); build(); };
+  $('showflow').onclick = () => {
+    const flow = $('production-flow');
+    const open = flow.hidden;
+    flow.hidden = !open;
+    $('showflow').setAttribute('aria-expanded', String(open));
+    $('showflow').textContent = open ? d.ui.hideFlow : d.ui.showFlow;
+  };
+  $('openlab').onclick = () => $('architecture-lab').scrollIntoView({ behavior: 'smooth', block: 'start' });
   $('sent').onkeydown = (e) => { if (e.key === 'Enter') build(); };
   let exIdx = 0;
   $('ex').onclick = () => {

@@ -4,7 +4,7 @@ import { defineConfig } from 'astro/config';
 const port = Number(process.env.PORT) || 4321;
 
 export default defineConfig({
-  site: 'https://example.com',
+  site: 'https://learning-with-bittu.routparamjeet.workers.dev',
   // Set `base` if you deploy to a subfolder, e.g. GitHub Pages:
   // base: '/MachineLearning-with-Bittu',
   server: { port },
@@ -16,7 +16,9 @@ export default defineConfig({
   i18n: {
     locales: ['en', 'hi'],
     defaultLocale: 'en',
-    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: true },
+    // Keep the localized routes, but let src/pages/index.astro render the
+    // production landing page directly instead of redirecting visitors to /en/.
+    routing: { prefixDefaultLocale: true, redirectToDefaultLocale: false },
   },
 
   // Bare, unprefixed entry points for each non-default section.

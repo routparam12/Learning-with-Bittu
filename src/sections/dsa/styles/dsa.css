@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 /* ══════════════════════════════════════════════════════════════
    Theme tokens. Dark is the default; [data-theme="light"] swaps the
@@ -22,7 +22,8 @@
   --lok1:#1f7a72;  --lok2:#17544f;
   --fnd1:#2ad3bd;  --fnd2:#17968a; --fnd-edge:#bffff4;
 
-  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --display:"Caveat","Comic Sans MS",cursive;
+  --body:"Bricolage Grotesque",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,monospace;
 
   /* Hootie — identical in both themes, she is her own thing */
@@ -49,11 +50,17 @@
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
-  background:var(--ink);color:var(--chalk);font-family:var(--display);
+  background:var(--ink);color:var(--chalk);font-family:var(--body);
   background-image:linear-gradient(var(--edge) 1px,transparent 1px),linear-gradient(90deg,var(--edge) 1px,transparent 1px);
   background-size:44px 44px;background-position:-1px -1px;
   min-height:100vh;
 }
+h1,h2,h3{font-family:var(--display);color:var(--chalk);font-weight:700;line-height:1.05;margin:0 0 .3em;letter-spacing:.01em}
+h1{font-size:clamp(44px,7vw,78px)}
+h2{font-size:clamp(32px,4.4vw,52px)}
+h3{font-size:clamp(24px,2.6vw,30px);color:var(--ink)}
+p{margin:0 0 .8em}
+a{color:var(--chalk)}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   background:radial-gradient(120% 80% at 50% 0%,transparent 20%,var(--ink) 78%);}
 .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:26px 20px 70px}
@@ -80,7 +87,7 @@ button,input{font-family:inherit}
 /* ── header ── */
 .back{font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:.04em}
 .back:hover{text-decoration:underline}
-.head h1{font-size:clamp(30px,5vw,50px);font-weight:800;letter-spacing:-.03em;margin:10px 0 2px;display:flex;gap:12px;align-items:center}
+.head h1{margin:10px 0 2px;display:flex;gap:12px;align-items:center}
 .head-emoji{font-size:.8em}
 .tagline{margin:0;color:var(--mute);font-size:17px}
 .chips{list-style:none;display:flex;flex-wrap:wrap;gap:8px;padding:0;margin:16px 0 0}

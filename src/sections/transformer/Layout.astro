@@ -2,6 +2,7 @@
 import './styles/transformer.css';
 import TopBar from './components/TopBar.astro';
 import AppSwitch from '../../shared/components/AppSwitch.astro';
+import Transy from './components/Transy.astro';
 import { DICTS, LANGS, swapLang, type Lang } from './i18n';
 import { SECTION_BY_ID } from '../index.js';
 
@@ -37,6 +38,7 @@ const accent = SECTION_BY_ID.transformer.accent;
   <AppSwitch section="transformer" locale={lang} />
   <TopBar lang={lang} />
   <slot />
+  <Transy name={d.ui.transyName} tips={d.transyTips} />
   <script>
     import { initChrome } from './scripts/chrome.js';
     initChrome();

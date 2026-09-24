@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
 /* ══════════════════════════════════════════════════════════════
    Theme tokens. Dark is the default; [data-theme="light"] swaps the
@@ -19,7 +19,8 @@
   --a0:#241d2c; --a1:#3c2f3d; --a2:#66492f; --a3:#a9702f; --a4:#ff9e64;
   --na:#191420;
 
-  --display:"Bricolage Grotesque",system-ui,sans-serif;
+  --display:"Caveat","Comic Sans MS",cursive;
+  --body:"Bricolage Grotesque",system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,monospace;
 }
 
@@ -37,8 +38,14 @@
 }
 
 *{box-sizing:border-box}
-body{margin:0;background:var(--ink);color:var(--chalk);font-family:var(--display);
+body{margin:0;background:var(--ink);color:var(--chalk);font-family:var(--body);
   -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);color:var(--chalk);font-weight:700;line-height:1.05;margin:0 0 .3em;letter-spacing:.01em}
+h1{font-size:clamp(44px,7vw,78px)}
+h2{font-size:clamp(32px,4.4vw,52px)}
+h3{font-size:clamp(24px,2.6vw,30px);color:var(--ink)}
+p{margin:0 0 .8em}
+a{color:var(--chalk)}
 main{display:block}
 
 .wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:26px 20px 70px}
@@ -59,7 +66,7 @@ main{display:block}
 /* ── header ─────────────────────────────────────────────────── */
 .back{font-family:var(--mono);font-size:12px;text-decoration:none;letter-spacing:.04em;color:var(--mute)}
 .back:hover{text-decoration:underline;color:var(--chalk)}
-.head h1{font-size:clamp(28px,4.4vw,46px);font-weight:800;letter-spacing:-.03em;margin:10px 0 2px;
+.head h1{margin:10px 0 2px;
   display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .head h1 em{font-style:normal;color:var(--pet)}
 .head-emoji{font-size:.8em}
@@ -69,6 +76,25 @@ main{display:block}
   font-family:var(--mono);font-size:11px;display:flex;gap:7px}
 .chips b{color:var(--mute);font-weight:400}
 .chips span{color:var(--torch)}
+
+/* ── two ways into the lesson ───────────────────────────────── */
+.learning-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:22px 0}
+.learning-card{background:var(--panel);border:1px solid var(--edge);border-radius:16px;padding:20px;box-shadow:0 14px 32px var(--shadow)}
+.working-card{border-top:3px solid var(--pet)}.model-card{border-top:3px solid var(--lock)}
+.card-kicker{font-family:var(--mono);font-size:10px !important;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:0 0 8px !important}
+.learning-card h2{font-family:var(--display);font-size:clamp(29px,3.4vw,42px);color:var(--chalk);margin:0 0 6px}
+.learning-card>p:not(.card-kicker){color:var(--mute);font-size:14px;line-height:1.55;min-height:44px}
+.path-action{appearance:none;cursor:pointer;background:var(--pet);border:1px solid var(--pet);border-radius:9px;color:var(--on-accent);padding:9px 12px;font-family:var(--display);font-size:17px;font-weight:700}
+.model-card .path-action{background:var(--lock);border-color:var(--lock)}
+.production-flow{margin-top:16px;padding-top:14px;border-top:1px solid var(--edge)}
+.production-flow pre{margin:0;font-family:var(--mono);font-size:10px;line-height:1.5;color:var(--mute);white-space:pre-wrap}
+.production-flow .block-divider{margin:10px 0;padding:8px;border:1px solid color-mix(in srgb,var(--pet) 55%,var(--edge));border-radius:8px;background:color-mix(in srgb,var(--pet) 10%,var(--panel2));color:var(--pet);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;line-height:1.5;text-align:center}
+.production-flow .block-divider small{color:var(--chalk);font-size:9px;font-weight:400;letter-spacing:0}
+.loop-copy{white-space:pre-line;color:var(--mute);font-size:12px !important;line-height:1.55;margin:14px 0 !important}
+.reference-link{display:inline-block;margin-top:12px;color:var(--torch);font-family:var(--mono);font-size:11px;text-decoration:none}.reference-link:hover{text-decoration:underline}
+.layer-mini-diagram{display:flex;align-items:center;gap:6px;margin:16px 0 14px;overflow-x:auto;font-family:var(--mono);font-size:10px;color:var(--lock)}
+.layer-mini-diagram span{padding:7px 8px;border:1px solid color-mix(in srgb,var(--lock) 60%,var(--edge));border-radius:6px;background:color-mix(in srgb,var(--lock) 9%,var(--panel2));white-space:nowrap}.layer-mini-diagram i{font-style:normal;color:var(--mute)}
+.model-card .reference-link{display:block;color:var(--lock)}
 
 /* ── setup ──────────────────────────────────────────────────── */
 .setup{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:22px 0 6px;
@@ -208,4 +234,5 @@ main{display:block}
   .speed{margin-left:0}
   .barrow{grid-template-columns:84px 1fr 48px}
   .slab{flex-basis:56px}
+  .learning-cards{grid-template-columns:1fr}
 }
